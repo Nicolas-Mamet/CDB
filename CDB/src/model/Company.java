@@ -30,6 +30,10 @@ public final class Company {
 	 * @return return null if id == 0 (no company); else return a new Company
 	 */
 	public static Company createCompany(long id, String name) {
+		if(id < 0) {
+			throw new IllegalArgumentException(
+					"All company IDs must be positive");
+		}
 		if(id != 0) {
 			return new Company(id, name);
 		} else {

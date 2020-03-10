@@ -1,11 +1,11 @@
-package persistence;
+package persistence.implementation;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 
-public class ConnectionDB {
+final class ConnectionDB {
 	
 	private static final String url =
 			"jdbc:mysql://localhost/computer-database-db";

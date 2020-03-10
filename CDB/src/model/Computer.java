@@ -27,8 +27,18 @@ public final class Computer {
 		return company;
 	}
 	
-	private Computer(long id) {
-		this.id = id;
+	/**
+	 * A computer should not have an ID of 0 unless it has yet to be created
+	 * in the database; this function does not check whether the ID actually
+	 * exists in the database
+	 * @return true if id != 0; return false if id == 0
+	 */
+	public boolean hasValidID () {
+		return id != 0;
+	}
+	
+	private Computer(String name) {
+		this.name = name;
 	}
 
 	public static class ComputerBuilder {
@@ -42,8 +52,8 @@ public final class Computer {
 			this.name = name;
  		}
 		
-		public ComputerBuilder withId(String name) {
-			this.name = name;
+		public ComputerBuilder withId(long id) {
+			this.id = id;
 			return this;
 		}
 		
@@ -63,11 +73,11 @@ public final class Computer {
 		}
 		
 		public Computer build() {
-			Computer computer = new Computer(id);
+			Computer computer = new Computer(name);
 			computer.company = this.company;
 			computer.discontinued = this.discontinued;
 			computer.introduced = this.introduced;
-			computer.name = this.name;
+			computer.id = this.id;
 			return computer;
 		}
 	}
@@ -88,7 +98,7 @@ public final class Computer {
 				System.out.println("absurd?");
 			} catch (IllegalAccessException e) {}
 		}
-		bob.append(")");
+		bob.append("]");
 		return bob.toString();
 	}
 	

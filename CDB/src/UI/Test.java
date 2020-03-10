@@ -6,26 +6,41 @@ import java.util.Optional;
 
 import model.Company;
 import model.Computer;
-import persistence.CompanyDAO;
-import persistence.ComputerDAO;
+import persistence.implementation.CompanyDAOImpl;
+import persistence.implementation.ComputerDAOImpl;
+import persistence.implementation.DAOFactory;
+import model.Computer.ComputerBuilder;
 
 public class Test {
 	
 	private Test() {}
 	
 	public static void main(String[] args) {
+		DAOFactory daoFactory = new DAOFactory();
 		try {
-			List<Computer> computers = ComputerDAO.getComputers();
+			List<Computer> computers =
+					daoFactory.getComputerDAO().getComputers();
 			for(Computer computer : computers) {
 				System.out.println(computer);
 			}
 			
-			List<Company> companies = CompanyDAO.getCompanies();
+			List<Company> companies = 
+					daoFactory.getCompanyDAO().getCompanies();
 			for(Company company : companies) {
 				System.out.println(company);
 			}
+			/*
+			Computer c1 = new ComputerBuilder("Ordinateur de bob").build();
+			daoFactory.getComputerDAO().createComputer(c1);
+			*/
 			
-			Optional<Computer> computer = ComputerDAO.getComputer(1200L);
+			Computer c2 = new ComputerBuilder("Ordinateur de bob 3")
+					.withId(577).build();
+			daoFactory.getComputerDAO().updateComputer(c2);
+			daoFactory.getComputerDAO().deleteComputer(c2.getId());
+			
+			Optional<Computer> computer = 
+					daoFactory.getComputerDAO().getComputer(577);
 			if(computer.isEmpty()) {
 				System.out.println("pas trouvé");
 			} else {
