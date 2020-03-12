@@ -1,4 +1,4 @@
-package UI;
+package exceptions;
 
 public class UserInterruptException extends Exception {
 

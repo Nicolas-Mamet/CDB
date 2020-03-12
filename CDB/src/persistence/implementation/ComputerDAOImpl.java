@@ -17,7 +17,7 @@ import model.Computer;
 import model.Computer.ComputerBuilder;
 import persistence.interfaces.ComputerDAO;
 
-public final class ComputerDAOImpl implements ComputerDAO{
+final class ComputerDAOImpl implements ComputerDAO{
 	
 	private ComputerDAOImpl() {}
 	
@@ -113,18 +113,6 @@ public final class ComputerDAOImpl implements ComputerDAO{
 	
 	public void createComputer(Computer computer) throws SQLException {
 		
-		if(computer.hasValidID()) {
-			throw new IllegalArgumentException("To be created computers should"
-					+ " have an ID of 0");
-		}
-		
-		Company company = computer.getCompany();
-		if(company != null
-				&& !CompanyDAOImpl.getInstance().checkCompany(company)) {
-			throw new IllegalArgumentException(
-					"The associated company does not exist");
-		}
-		
 		try(
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement preparedStatement = 
@@ -153,9 +141,7 @@ public final class ComputerDAOImpl implements ComputerDAO{
 		){
 			prepareStatement(preparedStatement, computer);
 			preparedStatement.setLong(5, computer.getId());
-			if(preparedStatement.executeUpdate() == 0) {
-				throw new IllegalArgumentException("Computer does not exist");
-			};
+			preparedStatement.executeUpdate();
 		}
 	}
 
@@ -187,9 +173,7 @@ public final class ComputerDAOImpl implements ComputerDAO{
 					connection.prepareStatement(DELETE_COMPUTER_QUERY);
 		){
 			preparedStatement.setLong(1, id);
-			if(preparedStatement.executeUpdate() == 0) {
-				throw new IllegalArgumentException("Computer does not exist");
-			}
+			preparedStatement.executeUpdate();
 		}
 	}
 }

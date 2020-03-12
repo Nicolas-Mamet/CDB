@@ -12,7 +12,7 @@ import java.util.Optional;
 import model.Company;
 import persistence.interfaces.CompanyDAO;
 
-public final class CompanyDAOImpl implements CompanyDAO{
+final class CompanyDAOImpl implements CompanyDAO{
 	
 	private static final CompanyDAOImpl INSTANCE = new CompanyDAOImpl();
 	
@@ -60,7 +60,7 @@ public final class CompanyDAOImpl implements CompanyDAO{
 	 * was found
 	 * @throws SQLException if something went wrong with the database
 	 */
-	protected boolean checkCompany(Company company) throws SQLException {
+	public boolean checkCompany(Company company) throws SQLException {
 		try(
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement statement = 
@@ -77,10 +77,7 @@ public final class CompanyDAOImpl implements CompanyDAO{
 						return true;
 					}
 				}
-			}
-					
-			
+			}		
 		}
-		
 	}
 }

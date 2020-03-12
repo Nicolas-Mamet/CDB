@@ -10,22 +10,21 @@ public interface ComputerDAO {
 
 	public List<Computer> getComputers() throws SQLException;
 
-	public Optional<Computer> getComputer(long l) throws SQLException;
+	public Optional<Computer> getComputer(long id) throws SQLException;
 	
 	/**
 	 * Add a computer in the database based on the parameter
-	 * @param c the id of this parameter must be invalid
+	 * @param c The computer created will be identical to c except for the id
 	 * @throws SQLException if something goes wrong with the database
-	 * @throws IllegalArgumentException if the id of c is not 0
 	 */
 	public void createComputer(Computer c) throws SQLException;
 	
 	/**
 	 * Updates the computer with the specified ID to make it identical to the
 	 * parameter
-	 * @param c ID must be valid
+	 * @param c the computer having the same id as c will be updated to
+	 * correspond to the content of c
 	 * @throws SQLException if something goes wrong with the database
-	 * @throws IllegalArgumentException if the id of c is not in the database
 	 */
 	public void updateComputer(Computer c) throws SQLException;
 	
@@ -33,8 +32,6 @@ public interface ComputerDAO {
 	 * Delete the computer with the specified ID
 	 * @param id
 	 * @throws SQLException if something goes wrong with the database
-	 * @throws IllegalArgumentException if there is no computer with the
-	 * specified id
 	 */
 	public void deleteComputer(long id) throws SQLException;
 }
