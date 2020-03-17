@@ -10,7 +10,7 @@ public interface ComputerDAO {
 
 	public List<Computer> getComputers() throws SQLException;
 
-	public Optional<Computer> getComputer(long id) throws SQLException;
+	public Optional<Computer> getComputer(long iD) throws SQLException;
 	
 	/**
 	 * Add a computer in the database based on the parameter
@@ -26,12 +26,12 @@ public interface ComputerDAO {
 	 * correspond to the content of c
 	 * @throws SQLException if something goes wrong with the database
 	 */
-	public void updateComputer(Computer c) throws SQLException;
+	public boolean updateComputer(Computer c) throws SQLException;
 	
 	/**
 	 * Delete the computer with the specified ID
 	 * @param id
 	 * @throws SQLException if something goes wrong with the database
 	 */
-	public void deleteComputer(long id) throws SQLException;
+	public boolean deleteComputer(long iD) throws SQLException;
 }

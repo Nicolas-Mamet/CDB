@@ -5,11 +5,22 @@ import services.interfaces.ServiceComputer;
 
 public class ServiceFactory {
 	
-	public ServiceComputer getComputerService() {
-		return ServiceComputerImpl.getInstance();
+	private ServiceComputer serviceComputer;
+	private ServiceCompany serviceCompany; 
+	
+	public ServiceComputer getServiceComputer() {
+		return serviceComputer;
 	}
 	
-	public ServiceCompany getCompanyService() {
-		return ServiceCompanyImpl.getInstance();
+	public ServiceCompany getServiceCompany() {
+		return serviceCompany;
+	}
+
+	public void setServiceComputer(ServiceComputer serviceComputer) {
+		this.serviceComputer = serviceComputer;
+	}
+
+	public void setServiceCompany(ServiceCompany serviceCompany) {
+		this.serviceCompany = serviceCompany;
 	}
 }

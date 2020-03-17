@@ -10,7 +10,7 @@ public abstract class AbstractServiceUser {
 		return serviceFactory;
 	}
 	
-	public static final void setDAOFactory(ServiceFactory pServiceFactory) {
+	public static final void setServiceFactory(ServiceFactory pServiceFactory) {
 		serviceFactory = pServiceFactory;
 	}
 }

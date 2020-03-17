@@ -1,17 +1,19 @@
 package services.implementation;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalLong;
 
+import exceptions.NotLongException;
+import mapper.Mapper;
 import model.Company;
+import model.Company.CompanyBuilder;
 import services.interfaces.ServiceCompany;
 
-final class ServiceCompanyImpl extends AbstractDAOUser 
+public final class ServiceCompanyImpl extends AbstractDAOUser 
 		implements ServiceCompany{
-	
-	private static final ServiceCompanyImpl INSTANCE = new ServiceCompanyImpl();
-	
-	protected static final ServiceCompanyImpl getInstance() { return INSTANCE; }
 	
 	@Override
 	public List<Company> getCompanies() throws SQLException {
@@ -19,9 +21,18 @@ final class ServiceCompanyImpl extends AbstractDAOUser
 	}
 
 	@Override
-	public boolean checkCompany(Company company) throws SQLException {
-		return company == null 
-				|| getDAOFactory().getCompanyDAO().checkCompany(company);
+	public Optional<Company> getCompany(String stringID, String name)
+			throws SQLException, NotLongException {
+		long iD = Mapper.mapLong(stringID);
+		CompanyBuilder bob = Company.builder().withID(iD);
+		if(name != null && !name.equals("")) {
+			bob.withName(name);
+		}
+		Company company = bob.build();
+		if(!getDAOFactory().getCompanyDAO().checkCompany(company)) {
+			return Optional.empty();
+		}
+		return Optional.of(company);
 	}
 
 }

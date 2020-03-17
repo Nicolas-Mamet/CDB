@@ -7,23 +7,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+import mapper.Mapper;
 import model.Company;
 import model.Computer;
 import model.Computer.ComputerBuilder;
 import persistence.interfaces.ComputerDAO;
 
-final class ComputerDAOImpl implements ComputerDAO{
+public final class ComputerDAOImpl implements ComputerDAO{
 	
-	private ComputerDAOImpl() {}
-	
-	private static final ComputerDAOImpl INSTANCE = new ComputerDAOImpl();
-	
-	protected static ComputerDAOImpl getInstance() { return INSTANCE; }
+	public ComputerDAOImpl() {}
 	
 	private static final String COMPUTER_LIST_QUERY =
 			"SELECT computer.id as idcomputer,"
@@ -33,38 +28,51 @@ final class ComputerDAOImpl implements ComputerDAO{
 					+ " FROM computer LEFT OUTER JOIN company"
 					+ " ON company_id = company.id";
 	
-	private static LocalDateTime toLocalDateTime(Timestamp t) {
-		 if(t == null) {
-			 return null;
-		 } else {
-			 return t.toLocalDateTime();
-		 }
-	}
+	private static final String GET_COMPUTER_QUERY =
+			COMPUTER_LIST_QUERY
+			+ " WHERE computer.id = ?";
 	
-	private static Timestamp valueOf(LocalDateTime ldt) {
-		if(ldt == null) {
-			 return null;
-		 } else {
-			 return Timestamp.valueOf(ldt);
-		 }
-	}
+	private static final String CREATE_COMPUTER_QUERY =
+			"INSERT INTO computer "
+			+ "(name, introduced, discontinued, company_id)"
+			+ " VALUES (?,?,?,?)";
 
+	private static final String UPDATE_COMPUTER_QUERY =
+			"UPDATE computer"
+			+ " SET name = ?,"
+			+ " introduced = ?,"
+			+ " discontinued = ?,"
+			+ " company_id = ?"
+			+ " WHERE id = ?";
+			
+	private static final String DELETE_COMPUTER_QUERY =
+			"DELETE FROM computer WHERE id = ?";
+	
 	private static Computer getComputerFromResultSet(ResultSet rs)
 			throws SQLException 
 	{
-		Company company = Company.createCompany(rs.getInt("company_id"),
-				rs.getString("namecompany"));
-		
-		Computer computer = new ComputerBuilder(rs.getString("nameComputer"))
-				.withCompany(company)
-				.withDiscontinued(
-						toLocalDateTime(rs.getTimestamp("discontinued")))
-				.withIntroduced(
-						toLocalDateTime(rs.getTimestamp("introduced")))
-				.withId(rs.getInt("idcomputer"))
-				.build();
+		ComputerBuilder bob = Computer.builder()
+				.withName(rs.getString("nameComputer"))
+				.withID(rs.getLong("idcomputer"));
+		Mapper.toLocalDateTime(rs.getTimestamp("discontinued"))
+				.ifPresent(date -> bob.withDiscontinued(date));
+		Mapper.toLocalDateTime(rs.getTimestamp("introduced"))
+				.ifPresent(date -> bob.withIntroduced(date));
+		getCompanyFromResultSet(rs)
+				.ifPresent(company -> bob.withCompany(company));
+		return bob.build();
+	}
 	
-		return computer;
+	private static Optional<Company> getCompanyFromResultSet(ResultSet rs)
+			throws SQLException{
+		long iD = rs.getLong("company_id");
+		if(iD == 0) {
+			return Optional.empty();
+		} else {
+			return Optional.of(Company.builder().withID(iD)
+					.withName(rs.getString("namecompany"))
+					.build());
+		}
 	}
 	
 	public List<Computer> getComputers() throws SQLException{
@@ -82,10 +90,6 @@ final class ComputerDAOImpl implements ComputerDAO{
 		return computers;
 	}
 	
-	private static final String GET_COMPUTER_QUERY =
-			COMPUTER_LIST_QUERY
-			+ " WHERE computer.id = ?";
-	
 	public Optional<Computer> getComputer(long id) throws SQLException{
 		Optional<Computer> computer = Optional.empty();
 		try (
@@ -100,16 +104,9 @@ final class ComputerDAOImpl implements ComputerDAO{
 							getComputerFromResultSet(resultSet));
 				}
 			}
-			
 		}
-		
 		return computer;
 	}
-	
-	private static final String CREATE_COMPUTER_QUERY =
-			"INSERT INTO computer "
-			+ "(name, introduced, discontinued, company_id)"
-			+ " VALUES (?,?,?,?)";
 	
 	public void createComputer(Computer computer) throws SQLException {
 		
@@ -123,57 +120,59 @@ final class ComputerDAOImpl implements ComputerDAO{
 		}
 	}
 
-	private static final String UPDATE_COMPUTER_QUERY =
-			"UPDATE computer"
-			+ " SET name = ?,"
-			+ " introduced = ?,"
-			+ " discontinued = ?,"
-			+ " company_id = ?"
-			+ " WHERE id = ?";
-			
-
 	@Override
-	public void updateComputer(Computer computer) throws SQLException {
+	public boolean updateComputer(Computer computer) throws SQLException {
 		try(
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement preparedStatement = 
 					connection.prepareStatement(UPDATE_COMPUTER_QUERY);
 		){
 			prepareStatement(preparedStatement, computer);
-			preparedStatement.setLong(5, computer.getId());
-			preparedStatement.executeUpdate();
+			preparedStatement.setLong(5, computer.getID());
+			return preparedStatement.executeUpdate() == 1;
 		}
 	}
 
-
-	private void prepareStatement(
-			PreparedStatement preparedStatement, Computer computer) 
-					throws SQLException {
-		preparedStatement.setString(1,computer.getName());
-		preparedStatement.setTimestamp(
-				2,valueOf(computer.getIntroduced()));
-		preparedStatement.setTimestamp(
-				3,valueOf(computer.getDiscontinued()));
-		Company company = computer.getCompany();
+	private void setDate(
+			PreparedStatement preparedStatement,
+			Optional<Timestamp> date,
+			int index) throws SQLException {
+		if(date.isPresent()){
+			preparedStatement.setTimestamp(index,date.get());
+		} else {
+			preparedStatement.setNull(index, Types.TIMESTAMP);
+		}
+	}
+	
+	private void setCompany(
+			PreparedStatement preparedStatement,
+			Company company,
+			int index) throws SQLException {
 		if(company != null) {
 			preparedStatement.setLong(4, company.getId());
 		} else {
 			preparedStatement.setNull(4, Types.BIGINT);
 		}
 	}
-
-	private static final String DELETE_COMPUTER_QUERY =
-			"DELETE FROM computer WHERE id = ?";
+	
+	private void prepareStatement(
+			PreparedStatement preparedStatement, Computer computer) 
+					throws SQLException {
+		preparedStatement.setString(1,computer.getName());
+		setDate(preparedStatement,Mapper.valueOf(computer.getIntroduced()),2);
+		setDate(preparedStatement,Mapper.valueOf(computer.getDiscontinued()),3);
+		setCompany(preparedStatement, computer.getCompany(), 4);
+	}
 	
 	@Override
-	public void deleteComputer(long id) throws SQLException {
+	public boolean deleteComputer(long id) throws SQLException {
 		try(
 			Connection connection = ConnectionDB.getConnection();
 			PreparedStatement preparedStatement = 
 					connection.prepareStatement(DELETE_COMPUTER_QUERY);
 		){
 			preparedStatement.setLong(1, id);
-			preparedStatement.executeUpdate();
+			return preparedStatement.executeUpdate() == 1;
 		}
 	}
 }

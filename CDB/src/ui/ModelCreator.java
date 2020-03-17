@@ -9,6 +9,7 @@ import model.Company;
 import model.Computer;
 import model.Computer.ComputerBuilder;
 
+@Deprecated
 public class ModelCreator {
 	private static final ModelCreator INSTANCE = new ModelCreator();
 	

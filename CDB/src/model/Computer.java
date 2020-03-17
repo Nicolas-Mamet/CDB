@@ -5,14 +5,14 @@ import java.time.LocalDateTime;
 
 public final class Computer {
 	
-	private long id;
+	private long iD;
 	private String name;
 	private LocalDateTime introduced;
 	private LocalDateTime discontinued;
 	private Company company;
 	
-	public long getId() {
-		return id;
+	public long getID() {
+		return iD;
 	}
 	public String getName() {
 		return name;
@@ -27,33 +27,23 @@ public final class Computer {
 		return company;
 	}
 	
-	/**
-	 * A computer should not have an ID of 0 unless it has yet to be created
-	 * in the database; this function does not check whether the ID actually
-	 * exists in the database
-	 * @return true if id != 0; return false if id == 0
-	 */
-	public boolean hasValidID () {
-		return id != 0;
+	public static ComputerBuilder builder() {
+		return new ComputerBuilder();
 	}
 	
-	private Computer(String name) {
-		this.name = name;
-	}
+	private Computer() {}
 
 	public static class ComputerBuilder {
-		private long id;
+		private long iD;
 		private String name;
 		private LocalDateTime introduced;
 		private LocalDateTime discontinued;
 		private Company company;
 		
-		public ComputerBuilder(String name) {
-			this.name = name;
- 		}
+		private ComputerBuilder() {}
 		
-		public ComputerBuilder withId(long id) {
-			this.id = id;
+		public ComputerBuilder withID(long iD) {
+			this.iD = iD;
 			return this;
 		}
 		
@@ -72,12 +62,18 @@ public final class Computer {
 			return this;
 		}
 		
+		public ComputerBuilder withName(String name) {
+			this.name = name;
+			return this;
+		}
+		
 		public Computer build() {
-			Computer computer = new Computer(name);
+			Computer computer = new Computer();
+			computer.name = this.name;
 			computer.company = this.company;
 			computer.discontinued = this.discontinued;
 			computer.introduced = this.introduced;
-			computer.id = this.id;
+			computer.iD = this.iD;
 			return computer;
 		}
 	}

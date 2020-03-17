@@ -9,19 +9,31 @@ import java.util.Optional;
 
 import javax.swing.undo.CannotRedoException;
 
+import exceptions.NotLongException;
 import exceptions.UserInterruptException;
 import model.Company;
 import model.Computer;
 import model.Computer.ComputerBuilder;
+import persistence.implementation.CompanyDAOImpl;
+import persistence.implementation.ComputerDAOImpl;
 import persistence.implementation.DAOFactory;
 import services.implementation.AbstractDAOUser;
 import services.implementation.ServiceFactory;
+import services.interfaces.ServiceCompany;
+import services.implementation.ServiceCompanyImpl;
+import services.implementation.ServiceComputerImpl;
 
 
 
 
-public final class CLI {
+public final class CLI extends AbstractCanRead{
 	 
+	private static ReadFromCL reader;
+	
+	public static void setReader(ReadFromCL pReader) {
+		reader = pReader;
+	}
+	
 	private static boolean ended;
 	
 	public static void main(String[] args) {
@@ -45,25 +57,25 @@ public final class CLI {
 	
 	private static final void switchLine()
 			throws SQLException, IOException, UserInterruptException {
-		String line = reader.readLine();
+		String line = reader.getString("Enter an action :");
 		switch (line) {
 		case "list computers":
-			listComputers();
+			ServiceCaller.printComputerList();
 			break;
 		case "list companies":
-			listCompanies();
+			ServiceCaller.printCompanyList();
 			break;
 		case "show computer":
-			getComputer();
+			ServiceCaller.printComputer();
 			break;
 		case "create computer":
-			createComputer();
+			ServiceCaller.createComputer();
 			break;
 		case "update computer":
-			updateComputer();
+			ServiceCaller.updateComputer();
 			break;
 		case "delete computer":
-			deleteComputer();
+			ServiceCaller.deleteComputer();
 			break;
 		case "exit" :
 		case "quit" :
@@ -71,20 +83,27 @@ public final class CLI {
 			break;
 		default :
 			System.out.println("default");
-			displayHelp();
+			//displayHelp();
 			switchLine();
 		}
 	}
 
 	private static void injectDependencies() {
 		DAOFactory daoFactory = new DAOFactory();
+		daoFactory.setCompanyDAO(new CompanyDAOImpl());
+		daoFactory.setComputerDAO(new ComputerDAOImpl());
 		AbstractDAOUser.setDAOFactory(daoFactory);
 		BufferedReader reader = new BufferedReader(
 				new InputStreamReader(System.in));
 		AbstractCanRead.setReader(reader);
 		//ReadFromCL.setReader(reader);
 		ServiceFactory serviceFactory = new ServiceFactory();
-		AbstractServiceUser.setDAOFactory(serviceFactory);
+		serviceFactory.setServiceCompany(new ServiceCompanyImpl());
+		serviceFactory.setServiceComputer(new ServiceComputerImpl());
+		AbstractServiceUser.setServiceFactory(serviceFactory);
+		ReadFromCL readFromCL = new ReadFromCL();
+		ServiceCaller.setReader(readFromCL);
+		CLI.setReader(readFromCL);
 		
 	}
 }

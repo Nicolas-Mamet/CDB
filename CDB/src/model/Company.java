@@ -2,42 +2,49 @@ package model;
 
 public final class Company {
 
-	private long id;
+	private long iD;
 	private String name;
 	
 	public long getId() {
-		return id;
+		return iD;
 	}
 	public String getName() {
 		return name;
 	}
 	
-	private Company(long id, String name) {
+	private Company(long iD, String name) {
 		super();
-		this.id = id;
+		this.iD = iD;
 		this.name = name;
+	}
+	
+	public static CompanyBuilder builder() {
+		return new CompanyBuilder();
+	}
+	
+	public static class CompanyBuilder {
+		private long iD;
+		private String name;
+		
+		private CompanyBuilder() {}
+		
+		public CompanyBuilder withID(long iD) {
+			this.iD = iD;
+			return this;
+		}
+		
+		public CompanyBuilder withName(String name) {
+			this.name = name;
+			return this;
+		}
+		
+		public Company build() {
+			return new Company(this.iD, this.name);
+		}
 	}
 	
 	@Override
 	public String toString() {
-		return "Company [(id : "+id+")(name : "+name+")]";
-	}
-	
-	/**
-	 * 
-	 * @param id company ID
-	 * @param name company name
-	 * @return return null if id == 0 (no company); else return a new Company
-	 */
-	public static Company createCompany(long id, String name) {
-		if(id < 0) {
-			throw new IllegalArgumentException(
-					"All company IDs must be positive");
-		}
-		if(id != 0) {
-			return new Company(id, name);
-		} else {
-			return null;
-		}
+		return "Company [(id : "+iD+")(name : "+name+")]";
 	}
 }

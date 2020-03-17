@@ -1,8 +1,9 @@
 package services.implementation;
 
 import persistence.implementation.DAOFactory;
+import ui.AbstractServiceUser;
 
-public abstract class AbstractDAOUser {
+public abstract class AbstractDAOUser extends AbstractServiceUser{
 	
 	private static DAOFactory daoFactory;
 	
