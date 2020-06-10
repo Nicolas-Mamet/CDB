@@ -36,4 +36,8 @@ public class InjectionListener implements ServletContextListener {
         daoFactory.setComputerDAO(new ComputerDAOImpl());
         AbstractDAOUser.setDAOFactory(daoFactory);
     }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent servletContextEvent) {
+    }
 }

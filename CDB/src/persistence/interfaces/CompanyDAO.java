@@ -7,6 +7,7 @@ import model.Company;
 
 public interface CompanyDAO {
 
-	public List<Company> getCompanies() throws SQLException;
-	public boolean checkCompany(Company c) throws SQLException;
+    public List<Company> getCompanies() throws SQLException;
+
+    public boolean checkCompany(Company c) throws SQLException;
 }

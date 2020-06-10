@@ -27,9 +27,7 @@ import util.ServletUtil;
 public class PrepareListing extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final String DEFAULT_OFFSET = "0";
-    private static final String DEFAULT_PAGE_SIZE = "10";
-    private String pageSize = DEFAULT_PAGE_SIZE;
-    private String offset = DEFAULT_OFFSET;
+    private static final String DEFAULT_LIMIT = "10";
 
     /**
      * @see HttpServlet#HttpServlet()
@@ -53,21 +51,28 @@ public class PrepareListing extends HttpServlet {
         } catch (WrongInitializationException e) {
             throw new ServletException(e);
         }
+        String offset;
         if (request.getParameterMap().containsKey("offset")) {
             offset = request.getParameter("offset");
-            System.out.println(offset);
+        } else {
+            offset = DEFAULT_OFFSET;
         }
+        String limit;
         if (request.getParameterMap().containsKey("limit")) {
-            pageSize = request.getParameter("limit");
-            System.out.println(pageSize);
+            limit = request.getParameter("limit");
+        } else {
+            limit = DEFAULT_LIMIT;
         }
-        PageDTO pageDTO = PageDTO.builder().withOffset(offset)
-                .withLimit(pageSize).build();
+        PageDTO pageDTO =
+                PageDTO.builder().withOffset(offset).withLimit(limit).build();
         try {
             List<ComputerDTO> listComputer =
                     serviceComputer.getComputers(pageDTO);
             request.setAttribute("list", listComputer);
-            RequestDispatcher rd = request.getRequestDispatcher("/listing.jsp");
+            request.setAttribute("limit", limit);
+            request.setAttribute("offset", offset);
+            RequestDispatcher rd =
+                    request.getRequestDispatcher("WEB-INF/dashboard.jsp");
             rd.forward(request, response);
         } catch (SQLException e) {
             throw new ServletException(e);

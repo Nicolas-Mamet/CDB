@@ -91,3 +91,20 @@ $(document).keydown(function(e) {
     }
 });
 
+
+//returns the offset for the previous page
+function previousPage(lim,off){
+	const limit = parseInt(lim,10);
+	const offset = parseInt(off,10);
+	document.getElementById("2").value = offset-limit>0?offset-limit:0;
+	document.getElementById("1").submit();
+}
+
+
+//returns the offset for the next page
+function nextPage(lim,off){
+	const limit = parseInt(lim,10);
+	const offset = parseInt(off,10);
+	document.getElementById("2").value = offset+limit;
+	document.getElementById("1").submit();
+}
