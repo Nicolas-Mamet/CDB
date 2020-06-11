@@ -86,6 +86,11 @@ public class ServiceComputerImpl extends AbstractDAOUser
         return getDAOFactory().getComputerDAO().updateComputer(computer);
     }
 
+    @Override
+    public long countComputers() throws SQLException {
+        return getDAOFactory().getComputerDAO().getComputers().size();
+    }
+
     private void checkUpdate(Computer computer, List<Problem> problemList)
             throws SQLException {
         checkID(computer, problemList);

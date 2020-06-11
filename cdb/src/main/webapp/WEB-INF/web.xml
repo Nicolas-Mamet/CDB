@@ -5,7 +5,7 @@
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
   <listener>
-  	<listener-class>listener.InjectionListener</listener-class>
+  	<listener-class>com.excilys.cdb.listener.InjectionListener</listener-class>
   </listener>
   <servlet>
   	<servlet-name>PrepareLinsting</servlet-name>

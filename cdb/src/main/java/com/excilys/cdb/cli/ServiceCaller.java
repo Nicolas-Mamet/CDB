@@ -12,6 +12,7 @@ import com.excilys.cdb.exceptions.NullComputerException;
 import com.excilys.cdb.exceptions.Problem;
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.mapper.Mapper;
+import com.excilys.cdb.util.PageManager;
 
 public class ServiceCaller extends AbstractServiceUser {
 

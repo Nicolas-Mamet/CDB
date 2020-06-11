@@ -1,8 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ page isELIgnored="false"%>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script src="./js/dashboard.js"></script>
 <!DOCTYPE html>
 
 <html>
@@ -25,7 +22,7 @@
 
   <section id="main">
     <div class="container">
-      <h1 id="homeTitle">121 Computers found</h1>
+      <h1 id="homeTitle">${pagemanager.nbItem} Computers found</h1>
       <div id="actions" class="form-horizontal">
         <div class="pull-left">
           <form id="searchForm" action="#" method="GET"
@@ -96,42 +93,38 @@
 
   <footer class="navbar-fixed-bottom">
     <div class="container text-center">
-      <form action="#" id="1">
-        <input type="hidden" name="limit" value="${limit}">
-        <input id="2" type="hidden" name="offset" value="0">
-      </form>
-      <ul class="pagination">
-        <li>
-          <button type="button" name="offset"
-            onclick="previousPage(${limit},${offset})"
-            aria-label="Previous">
-            <span aria-hidden="true">&laquo;</span>
-          </button>
-        </li>
-        <!-- <li><a href="#">1</a></li>
+        <ul class="pagination">
+          <li>
+            <a href="?offset=0&limit=${pagemanager.limit}">1</a>
+          <li>
+            <a href="?offset=${pagemanager.previousOffset()}&limit=${pagemanager.limit}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <!-- <li><a href="#">1</a></li>
                   <li><a href="#">2</a></li>
                   <li><a href="#">3</a></li>
                   <li><a href="#">4</a></li>
                   <li><a href="#">5</a></li> -->
-        <li>
-          <button type="button" onclick="nextPage(${limit},${offset})"
-            aria-label="Next">
-            <span aria-hidden="true">&raquo;</span>
-          </button>
-        </li>
-      </ul>
-
+          <li>
+            <a href="?offset=${pagemanager.nextOffset()}&limit=${pagemanager.limit}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+          <li>
+            <a href="?offset=${pagemanager.lastPageOffset()}&limit=${pagemanager.limit}">${pagemanager.nbPages()}</a>
+          <li>
+        </ul>
       <div class="btn-group btn-group-sm pull-right" role="group">
-        <form action="#">
-          <input type="submit" class="btn btn-default" name="limit"
-            value="10"> <input type="submit"
-            class="btn btn-default" name="limit" value="50"> <input
-            type="submit" class="btn btn-default" name="limit"
-            value="100">
-        </form>
+        <a href="?offset=${pagemanager.offset}&limit=10"><button type="button" class="btn btn-default">10</button></a>
+        <a href="?offset=${pagemanager.offset}&limit=50"><button type="button" class="btn btn-default">50</button></a>
+        <a href="?offset=${pagemanager.offset}&limit=100"><button type="button" class="btn btn-default">100</button></a>
       </div>
     </div>
   </footer>
+  <script src="./js/jquery.min.js"></script>
+  <script src="./js/bootstrap.min.js"></script>
+  <script src="./js/dashboard.js"></script>
 
 </body>
 </html>

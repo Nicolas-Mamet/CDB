@@ -26,4 +26,6 @@ public interface ServiceComputer {
 
     boolean updateComputer(ComputerDTO computer)
             throws SQLException, ProblemListException, NullComputerException;
+
+    long countComputers() throws SQLException;
 }

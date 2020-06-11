@@ -8,6 +8,7 @@ import java.util.Optional;
 import com.excilys.cdb.dto.CompanyDTO;
 import com.excilys.cdb.dto.ComputerDTO;
 import com.excilys.cdb.dto.PageDTO;
+import com.excilys.cdb.exceptions.AbsurdOptionalException;
 import com.excilys.cdb.exceptions.NotDateException;
 import com.excilys.cdb.exceptions.NotLongException;
 import com.excilys.cdb.exceptions.Problem;
@@ -15,8 +16,7 @@ import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.Company;
 import com.excilys.cdb.model.Computer;
 import com.excilys.cdb.model.Page;
-
-import util.GeneralUtil;
+import com.excilys.cdb.util.GeneralUtil;
 
 public class MapperDTO {
     public static Optional<ComputerDTO> ComputerToDTO(Computer computer) {
@@ -25,10 +25,10 @@ public class MapperDTO {
         } else {
             return Optional.of(ComputerDTO.builder()
                     .withID(computer.getID() + "").withName(computer.getName())
-                    .withDiscontinued(
-                            GeneralUtil.toString(computer.getDiscontinued()))
-                    .withIntroduced(
-                            GeneralUtil.toString(computer.getIntroduced()))
+                    .withDiscontinued(GeneralUtil
+                            .toString(computer.getDiscontinued()).orElse(null))
+                    .withIntroduced(GeneralUtil
+                            .toString(computer.getIntroduced()).orElse(null))
                     .withCompany(
                             CompanyToDTO(computer.getCompany()).orElse(null))
                     .build());
@@ -51,35 +51,19 @@ public class MapperDTO {
             return Optional.empty();
         } else {
             List<Problem> problemList = new ArrayList<Problem>();
-            Long iD = 0L;
-            try {
-                iD = Mapper.mapLong(computer.getID());
-            } catch (NotLongException e) {
-                problemList.add(Problem.createNotALong("ComputerID"));
-            }
-            Optional<LocalDateTime> introduced = Optional.empty();
-            try {
-                introduced = Mapper.mapLocalDateTime(computer.getIntroduced());
-            } catch (NotDateException e) {
-                problemList.add(Problem.createNotADate("Introduced"));
-            }
-            Optional<LocalDateTime> discontinued = Optional.empty();
-            try {
-                discontinued =
-                        Mapper.mapLocalDateTime(computer.getDiscontinued());
-            } catch (NotDateException e) {
-                problemList.add(Problem.createNotADate("Discontinued"));
-            }
-            Optional<Company> company = Optional.empty();
-            try {
-                company = MapperDTO.DTOToCompany(computer.getCompany());
-            } catch (NotLongException e) {
-                problemList.add(Problem.createNotALong("CompanyID"));
-            }
+            Optional<Long> iD =
+                    mapLong(computer.getID(), problemList, "ComputerID");
+            Optional<LocalDateTime> introduced = mapLocalDateTime(
+                    computer.getIntroduced(), problemList, "introduced");
+            Optional<LocalDateTime> discontinued = mapLocalDateTime(
+                    computer.getDiscontinued(), problemList, "discontinued");
+            Optional<Company> company =
+                    mapCompany(computer.getCompany(), problemList);
             if (problemList.size() > 0) {
                 throw new ProblemListException(problemList);
             } else {
-                return Optional.of(Computer.builder().withID(iD)
+                return Optional.of(Computer.builder()
+                        .withID(iD.orElseThrow(AbsurdOptionalException::new))
                         .withName(computer.getName())
                         .withIntroduced(introduced.orElse(null))
                         .withDiscontinued(discontinued.orElse(null))
@@ -104,24 +88,50 @@ public class MapperDTO {
         if (page == null) {
             return Optional.empty();
         } else {
-            Long offset = null;
-            Long limit = null;
             List<Problem> problemList = new ArrayList<Problem>();
-            try {
-                limit = Mapper.mapLong(page.getLimit());
-            } catch (NotLongException e) {
-                problemList.add(Problem.createNotALong("PageLimit"));
-            }
-            try {
-                offset = Mapper.mapLong(page.getOffset());
-            } catch (NotLongException e) {
-                problemList.add(Problem.createNotALong("PageOffset"));
-            }
+            Optional<Long> limit =
+                    mapLong(page.getLimit(), problemList, "limit");
+            Optional<Long> offset =
+                    mapLong(page.getOffset(), problemList, "offset");
             if (problemList.size() > 0) {
                 throw new ProblemListException(problemList);
             } else {
-                return Optional.of(Page.createPage(limit, offset));
+                return Optional.of(Page.createPage(
+                        limit.orElseThrow(AbsurdOptionalException::new),
+                        offset.orElseThrow(AbsurdOptionalException::new)));
             }
         }
     }
+
+    private static Optional<LocalDateTime> mapLocalDateTime(String introduced,
+            List<Problem> problemList, String message) {
+        try {
+            return Mapper.mapLocalDateTime(introduced);
+        } catch (NotDateException e) {
+            problemList.add(Problem.createNotADate(message));
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<Company> mapCompany(CompanyDTO companyDTO,
+            List<Problem> problemList) {
+        Optional<Company> company = Optional.empty();
+        try {
+            company = MapperDTO.DTOToCompany(companyDTO);
+        } catch (NotLongException e) {
+            problemList.add(Problem.createNotALong("CompanyID"));
+        }
+        return company;
+    }
+
+    private static Optional<Long> mapLong(String longString,
+            List<Problem> problemList, String message) {
+        try {
+            return Optional.of(Mapper.mapLong(longString));
+        } catch (NotLongException e) {
+            problemList.add(Problem.createNotALong(message));
+            return Optional.empty();
+        }
+    }
+
 }

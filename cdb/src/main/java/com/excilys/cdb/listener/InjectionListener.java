@@ -1,4 +1,4 @@
-package listener;
+package com.excilys.cdb.listener;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
