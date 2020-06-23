@@ -13,7 +13,8 @@ public class ConnectionDBTest {
     @Test
     public void testGetConnection() {
         try {
-            Connection c = ConnectionDB.getConnection();
+
+            Connection c = new ConnectionDB().getConnection();
             assertNotNull(c);
         } catch (SQLException e) {
             fail("SQLException raised");

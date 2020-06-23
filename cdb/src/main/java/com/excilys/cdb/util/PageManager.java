@@ -27,16 +27,13 @@ public class PageManager {
     }
 
     public long nbPages() {
-        System.out.println(nbItem / limit);
         return nbItem / limit + ((nbItem % limit == 0) ? 0 : 1);
     }
 
     public long lastPageOffset() {
         if (nbPages() <= 1) {
-            System.out.println(0);
             return 0;
         } else {
-            System.out.println(limit * (nbPages() - 1));
             return limit * (nbPages() - 1);
         }
     }

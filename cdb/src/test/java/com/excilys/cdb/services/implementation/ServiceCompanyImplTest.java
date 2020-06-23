@@ -13,7 +13,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.excilys.cdb.dto.CompanyDTO;
 import com.excilys.cdb.dto.PageDTO;
+import com.excilys.cdb.exceptions.DBException;
 import com.excilys.cdb.exceptions.InvalidPageException;
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.Company;
@@ -51,9 +53,16 @@ public class ServiceCompanyImplTest {
                 Company.builder().withID(1).withName("company1").build();
         Company company2 =
                 Company.builder().withID(2).withName("company2").build();
-        List<Company> companies = new ArrayList<Company>();
+        CompanyDTO companyDTO1 =
+                CompanyDTO.builder().withId("1").withName("company1").build();
+        CompanyDTO companyDTO2 =
+                CompanyDTO.builder().withId("2").withName("company2").build();
+        List<Company> companies = new ArrayList<>();
+        List<CompanyDTO> companiesDTO = new ArrayList<>();
         companies.add(company1);
         companies.add(company2);
+        companiesDTO.add(companyDTO1);
+        companiesDTO.add(companyDTO2);
         try {
             Mockito.when(companyDAO.getPageOfCompanies(page))
                     .thenReturn(companies);
@@ -62,10 +71,11 @@ public class ServiceCompanyImplTest {
         }
         ServiceCompany serviceCompany = new ServiceCompanyImpl();
         try {
+
             Assert.assertEquals(serviceCompany.getCompanies(pageDTO),
-                    companies);
-        } catch (SQLException e) {
-            Assert.fail("SQLException thrown");
+                    companiesDTO);
+        } catch (DBException e) {
+            Assert.fail("DBException thrown");
         } catch (InvalidPageException e) {
             Assert.fail("InvalidPageException thrown");
         } catch (ProblemListException e) {
@@ -88,8 +98,8 @@ public class ServiceCompanyImplTest {
         try {
             Assert.assertEquals(serviceCompany.getCompanies(pageDTO),
                     new ArrayList<Company>());
-        } catch (SQLException e) {
-            Assert.fail("SQLException thrown");
+        } catch (DBException e) {
+            Assert.fail("DBException thrown");
         } catch (InvalidPageException e) {
             Assert.fail("InvalidPageException thrown");
         } catch (ProblemListException e) {
@@ -105,8 +115,8 @@ public class ServiceCompanyImplTest {
         try {
             serviceCompany.getCompanies(pageDTO);
             Assert.fail("No exception thrown");
-        } catch (SQLException e) {
-            Assert.fail("SQLException thrown");
+        } catch (DBException e) {
+            Assert.fail("DBException thrown");
         } catch (InvalidPageException e) {
 
         } catch (ProblemListException e) {
@@ -122,8 +132,8 @@ public class ServiceCompanyImplTest {
         try {
             serviceCompany.getCompanies(pageDTO);
             Assert.fail("No exception thrown");
-        } catch (SQLException e) {
-            Assert.fail("SQLException thrown");
+        } catch (DBException e) {
+            Assert.fail("DBException thrown");
         } catch (InvalidPageException e) {
 
         } catch (ProblemListException e) {

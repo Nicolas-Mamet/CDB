@@ -1,5 +1,6 @@
 package com.excilys.cdb.persistence.interfaces;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +11,11 @@ import com.excilys.cdb.model.Page;
 public interface ComputerDAO {
 
     List<Computer> getComputers() throws SQLException;
+
+    List<Computer> getComputers(String search) throws SQLException;
+
+    List<Computer> searchComputers(Page page, String search)
+            throws SQLException;
 
     List<Computer> getPageOfComputers(Page page) throws SQLException;
 
@@ -40,4 +46,24 @@ public interface ComputerDAO {
      * @throws SQLException if something goes wrong with the database
      */
     boolean deleteComputer(long iD) throws SQLException;
+
+    /**
+     * Delete all computer whose ids are passed in the parameter
+     *
+     * @param ids list of computer ids to delete
+     * @return list of unknown ids
+     * @throws SQLException
+     */
+    void deleteComputers(List<Long> ids) throws SQLException;
+
+    /**
+     * delete all computers from given company
+     *
+     * @param id company id
+     * @throws SQLException
+     */
+    void deleteComputersFromCompany(long id, Connection connection)
+            throws SQLException;
+
+    void setDataSource(SQLDataSource dataSource);
 }

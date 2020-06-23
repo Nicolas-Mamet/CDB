@@ -1,22 +1,23 @@
 package com.excilys.cdb.dto;
 
 public class ComputerDTO {
-    private String iD;
+
+    private String id;
     private String name;
     private String introduced;
     private String discontinued;
     private CompanyDTO company;
 
     private ComputerDTO(Builder builder) {
-        this.iD = builder.iD;
+        this.id = builder.id;
         this.name = builder.name;
         this.introduced = builder.introduced;
         this.discontinued = builder.discontinued;
         this.company = builder.company;
     }
 
-    public String getID() {
-        return iD;
+    public String getId() {
+        return id;
     }
 
     public String getName() {
@@ -35,6 +36,13 @@ public class ComputerDTO {
         return company;
     }
 
+    @Override
+    public String toString() {
+        return "ComputerDTO [iD=" + id + ", name=" + name + ", introduced="
+                + introduced + ", discontinued=" + discontinued + ", company="
+                + company + "]";
+    }
+
     /**
      * Creates builder to build {@link ComputerDTO}.
      *
@@ -48,7 +56,7 @@ public class ComputerDTO {
      * Builder to build {@link ComputerDTO}.
      */
     public static final class Builder {
-        private String iD;
+        private String id;
         private String name;
         private String introduced;
         private String discontinued;
@@ -57,8 +65,8 @@ public class ComputerDTO {
         private Builder() {
         }
 
-        public Builder withID(String iD) {
-            this.iD = iD;
+        public Builder withId(String iD) {
+            this.id = iD;
             return this;
         }
 

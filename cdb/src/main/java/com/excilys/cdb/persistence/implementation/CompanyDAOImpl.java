@@ -12,11 +12,21 @@ import java.util.Optional;
 import com.excilys.cdb.model.Company;
 import com.excilys.cdb.model.Page;
 import com.excilys.cdb.persistence.interfaces.CompanyDAO;
+import com.excilys.cdb.persistence.interfaces.SQLDataSource;
+import com.excilys.cdb.services.implementation.AbstractDAOUser;
 
-public final class CompanyDAOImpl implements CompanyDAO {
+public final class CompanyDAOImpl extends AbstractDAOUser
+        implements CompanyDAO {
+
+    private SQLDataSource dataSource;
+
+    @Override
+    public void setDataSource(SQLDataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     private static final String COMPANY_LIST_QUERY =
-            "SELECT id, name FROM company ORDER BY id";
+            "SELECT id, name FROM company ORDER BY name";
 
     private static final String PAGE_LIST_QUERY =
             "SELECT id, name FROM company" + " ORDER BY id LIMIT ? OFFSET ?";
@@ -24,11 +34,14 @@ public final class CompanyDAOImpl implements CompanyDAO {
     private static final String GET_COMPANY_QUERY =
             "SELECT id,name FROM company" + " WHERE id = ?";
 
+    private static final String DELETE_COMPANY_QUERY =
+            "DELETE FROM company where id = ?";
+
     @Override
     public List<Company> getCompanies() throws SQLException {
         List<Company> companies = new ArrayList<>();
 
-        try (Connection connection = ConnectionDB.getConnection();
+        try (Connection connection = dataSource.getConnection();
                 Statement statement = connection.createStatement();
                 ResultSet resultSet =
                         statement.executeQuery(COMPANY_LIST_QUERY);) {
@@ -41,8 +54,8 @@ public final class CompanyDAOImpl implements CompanyDAO {
     }
 
     @Override
-    public Optional<String> getCompanyName(Long iD) throws SQLException {
-        try (Connection connection = ConnectionDB.getConnection();
+    public Optional<String> getCompanyName(long iD) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
                 PreparedStatement statement =
                         connection.prepareStatement(GET_COMPANY_QUERY);) {
             statement.setLong(1, iD);
@@ -64,7 +77,7 @@ public final class CompanyDAOImpl implements CompanyDAO {
     public List<Company> getPageOfCompanies(Page page) throws SQLException {
         List<Company> companies = new ArrayList<>();
 
-        try (Connection connection = ConnectionDB.getConnection();
+        try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(PAGE_LIST_QUERY);) {
             preparedStatement.setLong(1, page.getLimit());
@@ -79,5 +92,22 @@ public final class CompanyDAOImpl implements CompanyDAO {
         }
         // System.out.println(companies.size());
         return companies;
+    }
+
+    @Override
+    public boolean deleteCompany(long id) throws SQLException {
+        boolean ok;
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            getDAOFactory().getComputerDAO().deleteComputersFromCompany(id,
+                    connection);
+            try (PreparedStatement statement =
+                    connection.prepareStatement(DELETE_COMPANY_QUERY)) {
+                statement.setLong(1, id);
+                ok = 1 == statement.executeUpdate();
+            }
+            connection.commit();
+        }
+        return ok;
     }
 }

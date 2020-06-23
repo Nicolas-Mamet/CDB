@@ -1,18 +1,17 @@
 package com.excilys.cdb.cli;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 import com.excilys.cdb.dto.CompanyDTO;
 import com.excilys.cdb.dto.ComputerDTO;
-import com.excilys.cdb.exceptions.InvalidPageException;
+import com.excilys.cdb.exceptions.DBException;
+import com.excilys.cdb.exceptions.InvalidCompanyException;
 import com.excilys.cdb.exceptions.NotLongException;
 import com.excilys.cdb.exceptions.NullComputerException;
 import com.excilys.cdb.exceptions.Problem;
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.mapper.Mapper;
-import com.excilys.cdb.util.PageManager;
 
 public class ServiceCaller extends AbstractServiceUser {
 
@@ -22,28 +21,31 @@ public class ServiceCaller extends AbstractServiceUser {
         ServiceCaller.reader = reader;
     }
 
-    public static void printComputerList() throws SQLException, IOException {
-        PageManager pageManager = null;
-        pageManager = PageManager.createPageManager(readLimit());
-        boolean tryAgain = true;
-        while (tryAgain) {
-            try {
-                List<ComputerDTO> computers = null;
-                try {
-                    computers = getServiceFactory().getServiceComputer()
-                            .getComputers(pageManager.next());
-                } catch (ProblemListException e) {
-                    System.out.println("Absurd (page manager is bugged?)");
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-                tryAgain = computers.size() != 0;
-                computers.stream()
-                        .forEach(company -> System.out.println(company));
-            } catch (InvalidPageException e) {
-                System.out.println("Limit must be positive");
-            }
-        }
+    public static void printComputerList() throws DBException, IOException {
+        System.out.println("not implemented");
+
+//        PageManager pageManager = null;
+//        pageManager = PageManager.builder().withLimit(readLimit())
+//                .withNbItem(600).withOffset(0).build();
+//        boolean tryAgain = true;
+//        while (tryAgain) {
+//            try {
+//                List<ComputerDTO> computers = null;
+//                try {
+//                    computers = getServiceFactory().getServiceComputer()
+//                            .getComputers(pageManager.next());
+//                } catch (ProblemListException e) {
+//                    System.out.println("Absurd (page manager is bugged?)");
+//                    e.printStackTrace();
+//                    System.exit(1);
+//                }
+//                tryAgain = computers.size() != 0;
+//                computers.stream()
+//                        .forEach(company -> System.out.println(company));
+//            } catch (InvalidPageException e) {
+//                System.out.println("Limit must be positive");
+//            }
+//        }
     }
 
     private static long readLimit() throws IOException {
@@ -59,29 +61,31 @@ public class ServiceCaller extends AbstractServiceUser {
         return limit;
     }
 
-    public static void printCompanyList() throws SQLException, IOException {
-        PageManager pageManager = null;
-        pageManager = PageManager.createPageManager(readLimit());
-        boolean tryAgain = true;
-        while (tryAgain) {
-            try {
-                List<CompanyDTO> companies = null;
-                try {
-                    companies = getServiceFactory().getServiceCompany()
-                            .getCompanies(pageManager.next());
-                } catch (ProblemListException e) {
-                    System.out.println("Absurd (page manager is bugged?)");
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-                tryAgain = companies.size() != 0;
-                companies.stream()
-                        .forEach(company -> System.out.println(company));
-            } catch (InvalidPageException e) {
-                System.out.println("absurd");
-                return;
-            }
-        }
+    public static void printCompanyList() throws DBException, IOException {
+        System.out.println("not implemented");
+
+//        PageManager pageManager = null;
+//        pageManager = PageManager.createPageManager(readLimit());
+//        boolean tryAgain = true;
+//        while (tryAgain) {
+//            try {
+//                List<CompanyDTO> companies = null;
+//                try {
+//                    companies = getServiceFactory().getServiceCompany()
+//                            .getCompanies(pageManager.next());
+//                } catch (ProblemListException e) {
+//                    System.out.println("Absurd (page manager is bugged?)");
+//                    e.printStackTrace();
+//                    System.exit(1);
+//                }
+//                tryAgain = companies.size() != 0;
+//                companies.stream()
+//                        .forEach(company -> System.out.println(company));
+//            } catch (InvalidPageException e) {
+//                System.out.println("absurd");
+//                return;
+//            }
+//        }
     }
 
     public static boolean errorHandling(String message) throws IOException {
@@ -90,7 +94,7 @@ public class ServiceCaller extends AbstractServiceUser {
         return reader.getString("Anything else : Back to menu").equals("1");
     }
 
-    public static void printComputer() throws IOException, SQLException {
+    public static void printComputer() throws IOException, DBException {
         boolean tryAgain = true;
         while (tryAgain) {
             String iD = reader.getString("Computer ID :");
@@ -106,7 +110,7 @@ public class ServiceCaller extends AbstractServiceUser {
         }
     }
 
-    public static void deleteComputer() throws IOException, SQLException {
+    public static void deleteComputer() throws IOException, DBException {
         boolean tryAgain = true;
         while (tryAgain) {
             String iD = reader.getString("Computer ID :");
@@ -124,7 +128,7 @@ public class ServiceCaller extends AbstractServiceUser {
         }
     }
 
-    public static void createComputer() throws IOException, SQLException {
+    public static void createComputer() throws IOException, DBException {
         boolean tryAgain = true;
         while (tryAgain) {
             String name = reader.getString("Computer name (mandatory) :");
@@ -159,7 +163,7 @@ public class ServiceCaller extends AbstractServiceUser {
         }
     }
 
-    public static void updateComputer() throws IOException, SQLException {
+    public static void updateComputer() throws IOException, DBException {
         boolean tryAgain = true;
         while (tryAgain) {
             String iD = reader.getString("Computer ID (mandatory) : ");
@@ -197,6 +201,29 @@ public class ServiceCaller extends AbstractServiceUser {
         }
     }
 
+    public static void deleteCompany() throws IOException, DBException {
+        boolean tryAgain = true;
+        while (tryAgain) {
+            String iD = reader.getString("Company ID (mandatory) : ");
+
+            try {
+                if (getServiceFactory().getServiceCompany().deleteCompany(iD)) {
+                    System.out.println("Company and all associated"
+                            + " computers successfully deleted");
+
+                } else {
+                    System.out.println("Failed to delete the company");
+                }
+            } catch (NotLongException e) {
+                System.out.println(iD + " is not a valid number");
+                tryAgain = errorHandling("");
+            } catch (InvalidCompanyException e) {
+                System.out.println("The company was not found");
+                tryAgain = errorHandling("");
+            }
+        }
+    }
+
     private static void dealWithProblemList(List<Problem> list) {
         for (Problem problem : list) {
             switch (problem.getNature()) {
@@ -229,7 +256,6 @@ public class ServiceCaller extends AbstractServiceUser {
                 throw new RuntimeException("Non exhaustive switch");
             }
         }
-
     }
 
 }

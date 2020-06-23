@@ -3,9 +3,10 @@ package com.excilys.cdb.persistence.implementation;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.excilys.cdb.persistence.interfaces.SQLDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 
-final class ConnectionDB {
+public final class ConnectionDB implements SQLDataSource {
 
     private static final String URL =
             "jdbc:mysql://localhost/computer-database-db";
@@ -28,10 +29,8 @@ final class ConnectionDB {
         }
     }
 
-    public static Connection getConnection() throws SQLException {
+    @Override
+    public Connection getConnection() throws SQLException {
         return DATASOURCE.getConnection();
-    }
-
-    private ConnectionDB() {
     }
 }

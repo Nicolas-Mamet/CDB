@@ -26,7 +26,7 @@ public class xmlDBSetup {
                     + " ORDER BY id LIMIT 20";
 
     private static void initXML() throws DatabaseUnitException, SQLException {
-        try (Connection jdbcConnection = ConnectionDB.getConnection();) {
+        try (Connection jdbcConnection = new ConnectionDB().getConnection();) {
             IDatabaseConnection connection =
                     new DatabaseConnection(jdbcConnection);
             DatabaseConfig dbConfig = connection.getConfig();

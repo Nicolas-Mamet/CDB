@@ -6,8 +6,4 @@ public class NotLongException extends Exception {
         super();
     }
 
-    public NotLongException(Exception compoundException) {
-        super(compoundException);
-    }
-
 }

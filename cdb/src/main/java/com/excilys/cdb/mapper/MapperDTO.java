@@ -16,7 +16,6 @@ import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.Company;
 import com.excilys.cdb.model.Computer;
 import com.excilys.cdb.model.Page;
-import com.excilys.cdb.util.GeneralUtil;
 
 public class MapperDTO {
     public static Optional<ComputerDTO> ComputerToDTO(Computer computer) {
@@ -24,11 +23,13 @@ public class MapperDTO {
             return Optional.empty();
         } else {
             return Optional.of(ComputerDTO.builder()
-                    .withID(computer.getID() + "").withName(computer.getName())
-                    .withDiscontinued(GeneralUtil
-                            .toString(computer.getDiscontinued()).orElse(null))
-                    .withIntroduced(GeneralUtil
-                            .toString(computer.getIntroduced()).orElse(null))
+                    .withId(computer.getID() + "").withName(computer.getName())
+                    .withDiscontinued(Optional
+                            .ofNullable(computer.getDiscontinued())
+                            .map(d -> d.toLocalDate().toString()).orElse(null))
+                    .withIntroduced(Optional
+                            .ofNullable(computer.getIntroduced())
+                            .map(d -> d.toLocalDate().toString()).orElse(null))
                     .withCompany(
                             CompanyToDTO(computer.getCompany()).orElse(null))
                     .build());
@@ -51,12 +52,11 @@ public class MapperDTO {
             return Optional.empty();
         } else {
             List<Problem> problemList = new ArrayList<Problem>();
-            Optional<Long> iD =
-                    mapLong(computer.getID(), problemList, "ComputerID");
-            Optional<LocalDateTime> introduced = mapLocalDateTime(
-                    computer.getIntroduced(), problemList, "introduced");
-            Optional<LocalDateTime> discontinued = mapLocalDateTime(
-                    computer.getDiscontinued(), problemList, "discontinued");
+            Optional<Long> iD = mapLong(computer.getId(), problemList);
+            Optional<LocalDateTime> introduced =
+                    mapLocalDateTime(computer.getIntroduced(), problemList);
+            Optional<LocalDateTime> discontinued =
+                    mapLocalDateTime(computer.getDiscontinued(), problemList);
             Optional<Company> company =
                     mapCompany(computer.getCompany(), problemList);
             if (problemList.size() > 0) {
@@ -77,9 +77,13 @@ public class MapperDTO {
         if (company == null) {
             return Optional.empty();
         } else {
-            Long iD = Mapper.mapLong(company.getId());
-            return Optional.of(Company.builder().withID(iD)
-                    .withName(company.getName()).build());
+            long iD = Mapper.mapLong(company.getId());
+            if (iD == 0) {
+                return Optional.empty();
+            } else {
+                return Optional.of(Company.builder().withID(iD)
+                        .withName(company.getName()).build());
+            }
         }
     }
 
@@ -89,10 +93,8 @@ public class MapperDTO {
             return Optional.empty();
         } else {
             List<Problem> problemList = new ArrayList<Problem>();
-            Optional<Long> limit =
-                    mapLong(page.getLimit(), problemList, "limit");
-            Optional<Long> offset =
-                    mapLong(page.getOffset(), problemList, "offset");
+            Optional<Long> limit = mapLong(page.getLimit(), problemList);
+            Optional<Long> offset = mapLong(page.getOffset(), problemList);
             if (problemList.size() > 0) {
                 throw new ProblemListException(problemList);
             } else {
@@ -104,11 +106,11 @@ public class MapperDTO {
     }
 
     private static Optional<LocalDateTime> mapLocalDateTime(String introduced,
-            List<Problem> problemList, String message) {
+            List<Problem> problemList) {
         try {
             return Mapper.mapLocalDateTime(introduced);
         } catch (NotDateException e) {
-            problemList.add(Problem.createNotADate(message));
+            problemList.add(Problem.createNotADate(introduced));
             return Optional.empty();
         }
     }
@@ -119,19 +121,21 @@ public class MapperDTO {
         try {
             company = MapperDTO.DTOToCompany(companyDTO);
         } catch (NotLongException e) {
-            problemList.add(Problem.createNotALong("CompanyID"));
+            problemList.add(Problem.createNotALong(companyDTO.getId()));
         }
         return company;
     }
 
     private static Optional<Long> mapLong(String longString,
-            List<Problem> problemList, String message) {
+            List<Problem> problemList) {
+        if (longString == null) {
+            return Optional.of(-1L);
+        }
         try {
             return Optional.of(Mapper.mapLong(longString));
         } catch (NotLongException e) {
-            problemList.add(Problem.createNotALong(message));
+            problemList.add(Problem.createNotALong(longString));
             return Optional.empty();
         }
     }
-
 }

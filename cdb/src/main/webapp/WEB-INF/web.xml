@@ -4,6 +4,16 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
+  <filter>
+  	<filter-name>AddressFilter</filter-name>
+  	<display-name>AddressFilter</display-name>
+  	<description></description>
+  	<filter-class>com.excilys.cdb.servlet.AddressFilter</filter-class>
+  </filter>
+  <filter-mapping>
+  	<filter-name>AddressFilter</filter-name>
+  	<url-pattern>/AddressFilter</url-pattern>
+  </filter-mapping>
   <listener>
   	<listener-class>com.excilys.cdb.listener.InjectionListener</listener-class>
   </listener>
@@ -13,8 +23,88 @@
   	<description></description>
   	<servlet-class>servlet.PrepareLinsting</servlet-class>
   </servlet>
+  <servlet>
+  	<servlet-name>addComputerServlet</servlet-name>
+  	<display-name>addComputerServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.excilys.cdb.servlet.addComputerServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>prepareAdd</servlet-name>
+  	<display-name>prepareAdd</display-name>
+  	<description></description>
+  	<servlet-class>com.excilys.cdb.servlet.prepareAdd</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>ProblemListServlet</servlet-name>
+  	<display-name>ProblemListServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.excilys.cdb.servlet.ProblemListServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>PrepareEditServlet</servlet-name>
+  	<display-name>PrepareEditServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.excilys.cdb.servlet.PrepareEditServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>EditComputerServlet</servlet-name>
+  	<display-name>EditComputerServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.excilys.cdb.servlet.EditComputerServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>TestServlet</servlet-name>
+  	<display-name>TestServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.excilys.cdb.servlet.TestServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>DeleteComputerServlet</servlet-name>
+  	<display-name>DeleteComputerServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.excilys.cdb.servlet.DeleteComputerServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>SearchServlet</servlet-name>
+  	<display-name>SearchServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.excilys.cdb.servlet.SearchServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
   	<servlet-name>PrepareLinsting</servlet-name>
   	<url-pattern>/PrepareLinsting</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>addComputerServlet</servlet-name>
+  	<url-pattern>/addComputerServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>prepareAdd</servlet-name>
+  	<url-pattern>/prepareAdd</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>ProblemListServlet</servlet-name>
+  	<url-pattern>/ProblemListServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>PrepareEditServlet</servlet-name>
+  	<url-pattern>/PrepareEditServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>EditComputerServlet</servlet-name>
+  	<url-pattern>/EditComputerServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>TestServlet</servlet-name>
+  	<url-pattern>/TestServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>DeleteComputerServlet</servlet-name>
+  	<url-pattern>/DeleteComputerServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>SearchServlet</servlet-name>
+  	<url-pattern>/SearchServlet</url-pattern>
   </servlet-mapping>
 </web-app>

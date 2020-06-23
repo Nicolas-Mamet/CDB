@@ -1,6 +1,5 @@
 package com.excilys.cdb.model;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 
 public final class Computer {
@@ -33,6 +32,13 @@ public final class Computer {
 
     public static ComputerBuilder builder() {
         return new ComputerBuilder();
+    }
+
+    @Override
+    public String toString() {
+        return "Computer [iD=" + iD + ", name=" + name + ", introduced="
+                + introduced + ", discontinued=" + discontinued + ", company="
+                + company + "]";
     }
 
     private Computer() {
@@ -82,27 +88,6 @@ public final class Computer {
             computer.iD = this.iD;
             return computer;
         }
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder bob = new StringBuilder().append("Computer[");
-        for (Field f : Computer.class.getDeclaredFields()) {
-            try {
-                // check access before modifying the builder
-                Object value = f.get(this);
-                bob.append("(");
-                bob.append(f.getName()).append(" : ").append(value);
-                bob.append(")");
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                System.out.println("absurd?");
-            } catch (IllegalAccessException e) {
-            }
-        }
-        bob.append("]");
-        return bob.toString();
     }
 
 }

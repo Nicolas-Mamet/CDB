@@ -15,7 +15,7 @@
 <body>
   <header class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
-      <a class="navbar-brand" href="dashboard.html"> Application -
+      <a class="navbar-brand" href="${map.get('beforedashboard') }"> Application -
         Computer Database </a>
     </div>
   </header>
@@ -27,7 +27,7 @@
         <div class="pull-left">
           <form id="searchForm" action="#" method="GET"
             class="form-inline">
-
+            <input type="hidden" name="limit" value="${pagemanager.limit}"/>
             <input type="search" id="searchbox" name="search"
               class="form-control" placeholder="Search name" /> <input
               type="submit" id="searchsubmit" value="Filter by name"
@@ -36,14 +36,14 @@
         </div>
         <div class="pull-right">
           <a class="btn btn-success" id="addComputer"
-            href="addComputer.html">Add Computer</a> <a
+            href="${map.get('beforeadd') }">Add Computer</a> <a
             class="btn btn-default" id="editComputer" href="#"
             onclick="$.fn.toggleEditMode();">Edit</a>
         </div>
       </div>
     </div>
 
-    <form id="deleteForm" action="#" method="POST">
+    <form id="deleteForm" action="${map.get('delete') }" method="GET">
       <input type="hidden" name="selection" value="">
     </form>
 
@@ -77,15 +77,14 @@
           <c:forEach items="${list}" var="u">
             <tr>
               <td class="editMode"><input type="checkbox" name="cb"
-                class="cb" value="0"></td>
-              <td><a href="editComputer.html" onclick="">${u.name}</a>
+                class="cb" value="${u.id}" form="deleteForm"></td>
+              <td><a href="${map.get('beforeedit') }?id=${u.id}" onclick="">${u.name}</a>
               </td>
               <td><c:out value="${u.introduced}"></c:out></td>
               <td><c:out value="${u.discontinued}"></c:out></td>
               <td><c:out value="${u.company.name}"></c:out></td>
             </tr>
           </c:forEach>
-
         </tbody>
       </table>
     </div>
@@ -95,30 +94,25 @@
     <div class="container text-center">
         <ul class="pagination">
           <li>
-            <a href="?offset=0&limit=${pagemanager.limit}">1</a>
+            <a href="?offset=0&limit=${pagemanager.limit}&search=${search }">1</a>
           <li>
-            <a href="?offset=${pagemanager.previousOffset()}&limit=${pagemanager.limit}" aria-label="Previous">
+            <a href="?offset=${pagemanager.previousOffset()}&limit=${pagemanager.limit}&search=${search }" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
-          <!-- <li><a href="#">1</a></li>
-                  <li><a href="#">2</a></li>
-                  <li><a href="#">3</a></li>
-                  <li><a href="#">4</a></li>
-                  <li><a href="#">5</a></li> -->
           <li>
-            <a href="?offset=${pagemanager.nextOffset()}&limit=${pagemanager.limit}" aria-label="Next">
+            <a href="?offset=${pagemanager.nextOffset()}&limit=${pagemanager.limit}&search=${search }" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
           <li>
-            <a href="?offset=${pagemanager.lastPageOffset()}&limit=${pagemanager.limit}">${pagemanager.nbPages()}</a>
+            <a href="?offset=${pagemanager.lastPageOffset()}&limit=${pagemanager.limit}&search=${search }">${pagemanager.nbPages()}</a>
           <li>
         </ul>
       <div class="btn-group btn-group-sm pull-right" role="group">
-        <a href="?offset=${pagemanager.offset}&limit=10"><button type="button" class="btn btn-default">10</button></a>
-        <a href="?offset=${pagemanager.offset}&limit=50"><button type="button" class="btn btn-default">50</button></a>
-        <a href="?offset=${pagemanager.offset}&limit=100"><button type="button" class="btn btn-default">100</button></a>
+        <a href="?offset=${pagemanager.offset}&limit=10&search=${search }"><button type="button" class="btn btn-default">10</button></a>
+        <a href="?offset=${pagemanager.offset}&limit=50&search=${search }"><button type="button" class="btn btn-default">50</button></a>
+        <a href="?offset=${pagemanager.offset}&limit=100&search=${search }"><button type="button" class="btn btn-default">100</button></a>
       </div>
     </div>
   </footer>
