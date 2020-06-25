@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,6 +18,12 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.excilys.cdb.exceptions.AbsurdException;
+import com.excilys.cdb.exceptions.CorruptComputerException;
+import com.excilys.cdb.exceptions.CorruptComputersException;
+import com.excilys.cdb.exceptions.DBException;
+import com.excilys.cdb.exceptions.Problem;
+import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.mapper.Mapper;
 import com.excilys.cdb.model.Company;
 import com.excilys.cdb.model.Computer;
@@ -23,6 +31,7 @@ import com.excilys.cdb.model.Computer.ComputerBuilder;
 import com.excilys.cdb.model.Page;
 import com.excilys.cdb.persistence.interfaces.ComputerDAO;
 import com.excilys.cdb.persistence.interfaces.SQLDataSource;
+import com.excilys.cdb.servlet.Order;
 
 public final class ComputerDAOImpl implements ComputerDAO {
 
@@ -66,6 +75,25 @@ public final class ComputerDAOImpl implements ComputerDAO {
                     + " WHERE computer.name LIKE ?" + " ORDER BY computer.id"
                     + " LIMIT ? OFFSET ?";
 
+    private static final String COMPUTER_SEARCH_ORDER_QUERY =
+            "SELECT computer.id as idcomputer,"
+                    + " computer.name as namecomputer,"
+                    + " introduced, discontinued, company_id,"
+                    + " company.name as namecompany"
+                    + " FROM computer LEFT OUTER JOIN company"
+                    + " ON company_id = company.id"
+                    + " WHERE computer.name LIKE ?" + " ORDER BY %s"
+                    + " LIMIT ? OFFSET ?";
+
+    private static final String COMPUTER_ORDER_QUERY =
+            "SELECT computer.id as idcomputer,"
+                    + " computer.name as namecomputer,"
+                    + " introduced, discontinued, company_id,"
+                    + " company.name as namecompany"
+                    + " FROM computer LEFT OUTER JOIN company"
+                    + " ON company_id = company.id" + " ORDER BY %s"
+                    + " LIMIT ? OFFSET ?";
+
     private static final String PAGE_LIST_QUERY =
             "SELECT computer.id as idcomputer,"
                     + " computer.name as namecomputer,"
@@ -101,7 +129,7 @@ public final class ComputerDAOImpl implements ComputerDAO {
             "DELETE FROM computer WHERE company_id = ?";
 
     private static Computer getComputerFromResultSet(ResultSet rs)
-            throws SQLException {
+            throws SQLException, CorruptComputerException {
         ComputerBuilder bob =
                 Computer.builder().withName(rs.getString("nameComputer"))
                         .withID(rs.getLong("idcomputer"));
@@ -111,19 +139,32 @@ public final class ComputerDAOImpl implements ComputerDAO {
                 .ifPresent(date -> bob.withIntroduced(date));
         getCompanyFromResultSet(rs)
                 .ifPresent(company -> bob.withCompany(company));
-        return bob.build();
+        try {
+            return bob.build();
+        } catch (ProblemListException e) {
+            throw new CorruptComputerException(e.getList());
+        }
     }
 
     @Override
     public List<Computer> getComputers() throws SQLException {
         List<Computer> computers = new ArrayList<>();
-
+        List<List<Problem>> corruptComputers = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
                 Statement statement = connection.createStatement();
                 ResultSet resultSet =
                         statement.executeQuery(COMPUTER_LIST_QUERY);) {
             while (resultSet.next()) {
-                computers.add(getComputerFromResultSet(resultSet));
+                try {
+                    computers.add(getComputerFromResultSet(resultSet));
+                } catch (CorruptComputerException e) {
+                    corruptComputers.add(e.getProblemList());
+                }
+            }
+            if (corruptComputers.size() > 0) {
+                logger.error("Could not instantiate computers from database : "
+                        + corruptComputers.toString());
+                throw new CorruptComputersException(corruptComputers);
             }
         }
         return computers;
@@ -132,14 +173,30 @@ public final class ComputerDAOImpl implements ComputerDAO {
     @Override
     public List<Computer> getComputers(String search) throws SQLException {
         List<Computer> computers = new ArrayList<>();
-
+        List<List<Problem>> corruptComputers = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(SEARCH_LIST_QUERY);) {
             preparedStatement.setString(1, "%" + search + "%");
             try (ResultSet resultSet = preparedStatement.executeQuery();) {
                 while (resultSet.next()) {
-                    computers.add(getComputerFromResultSet(resultSet));
+                    try {
+                        computers.add(getComputerFromResultSet(resultSet));
+                    } catch (CorruptComputerException e) {
+                        corruptComputers.add(e.getProblemList());
+                    }
+                }
+                if (corruptComputers.size() > 0) {
+                    logger.error(
+                            "Could not instantiate computers from database : "
+                                    + corruptComputers.toString());
+                    throw new CorruptComputersException(corruptComputers);
+                }
+                if (corruptComputers.size() > 0) {
+                    logger.error(
+                            "Could not instantiate computers from database : "
+                                    + corruptComputers.toString());
+                    throw new CorruptComputersException(corruptComputers);
                 }
                 return computers;
             }
@@ -149,6 +206,7 @@ public final class ComputerDAOImpl implements ComputerDAO {
     @Override
     public List<Computer> getPageOfComputers(Page page) throws SQLException {
         List<Computer> computers = new ArrayList<>();
+        List<List<Problem>> corruptComputers = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(PAGE_LIST_QUERY);) {
@@ -156,8 +214,17 @@ public final class ComputerDAOImpl implements ComputerDAO {
             preparedStatement.setLong(2, page.getOffset());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    computers.add(getComputerFromResultSet(resultSet));
+                    try {
+                        computers.add(getComputerFromResultSet(resultSet));
+                    } catch (CorruptComputerException e) {
+                        corruptComputers.add(e.getProblemList());
+                    }
                 }
+            }
+            if (corruptComputers.size() > 0) {
+                logger.error("Could not instantiate computers from database : "
+                        + corruptComputers.toString());
+                throw new CorruptComputersException(corruptComputers);
             }
         }
         return computers;
@@ -167,6 +234,7 @@ public final class ComputerDAOImpl implements ComputerDAO {
     public List<Computer> searchComputers(Page page, String search)
             throws SQLException {
         List<Computer> computers = new ArrayList<>();
+        List<List<Problem>> corruptComputers = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(COMPUTER_SEARCH_QUERY);) {
@@ -175,9 +243,82 @@ public final class ComputerDAOImpl implements ComputerDAO {
             preparedStatement.setLong(3, page.getOffset());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    computers.add(getComputerFromResultSet(resultSet));
+                    try {
+                        computers.add(getComputerFromResultSet(resultSet));
+                    } catch (CorruptComputerException e) {
+                        corruptComputers.add(e.getProblemList());
+                    }
                 }
             }
+        }
+        if (corruptComputers.size() > 0) {
+            logger.error("Could not instantiate computers from database : "
+                    + corruptComputers.toString());
+            throw new CorruptComputersException(corruptComputers);
+        }
+        return computers;
+    }
+
+    @Override
+    public Collection<Computer> searchComputers(Page page, String search,
+            Order order) throws DBException {
+        List<Computer> computers = new ArrayList<>();
+        List<List<Problem>> corruptComputers = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(
+                                String.format(COMPUTER_SEARCH_ORDER_QUERY,
+                                        formatOrder(order)));) {
+            preparedStatement.setString(1, "%" + search + "%");
+            preparedStatement.setLong(2, page.getLimit());
+            preparedStatement.setLong(3, page.getOffset());
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    try {
+                        computers.add(getComputerFromResultSet(resultSet));
+                    } catch (CorruptComputerException e) {
+                        corruptComputers.add(e.getProblemList());
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DBException(e);
+        }
+        if (corruptComputers.size() > 0) {
+            logger.error("Could not instantiate computers from database : "
+                    + corruptComputers.toString());
+            throw new CorruptComputersException(corruptComputers);
+        }
+        return computers;
+    }
+
+    @Override
+    public Collection<Computer> searchComputers(Page page, Order order)
+            throws DBException {
+        List<Computer> computers = new ArrayList<>();
+        List<List<Problem>> corruptComputers = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(String.format(
+                                COMPUTER_ORDER_QUERY, formatOrder(order)));) {
+            preparedStatement.setLong(1, page.getLimit());
+            preparedStatement.setLong(2, page.getOffset());
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    try {
+                        computers.add(getComputerFromResultSet(resultSet));
+                    } catch (CorruptComputerException e) {
+                        corruptComputers.add(e.getProblemList());
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DBException(e);
+        }
+        if (corruptComputers.size() > 0) {
+            logger.error("Could not instantiate computers from database : "
+                    + corruptComputers.toString());
+            throw new CorruptComputersException(corruptComputers);
         }
         return computers;
     }
@@ -191,7 +332,16 @@ public final class ComputerDAOImpl implements ComputerDAO {
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    computer = Optional.of(getComputerFromResultSet(resultSet));
+                    try {
+                        computer = Optional
+                                .of(getComputerFromResultSet(resultSet));
+                    } catch (CorruptComputerException e) {
+                        logger.error(
+                                "Could not instantiate computers from database : "
+                                        + e.getProblemList().toString());
+                        throw new CorruptComputersException(
+                                Arrays.asList(e.getProblemList()));
+                    }
                 }
             }
         }
@@ -215,7 +365,7 @@ public final class ComputerDAOImpl implements ComputerDAO {
                 PreparedStatement preparedStatement =
                         connection.prepareStatement(UPDATE_COMPUTER_QUERY);) {
             prepareStatement(preparedStatement, computer);
-            preparedStatement.setLong(5, computer.getID());
+            preparedStatement.setLong(5, computer.getId());
             return preparedStatement.executeUpdate() == 1;
         }
     }
@@ -312,8 +462,41 @@ public final class ComputerDAOImpl implements ComputerDAO {
         if (iD == 0) {
             return Optional.empty();
         } else {
-            return Optional.of(Company.builder().withID(iD)
-                    .withName(rs.getString("namecompany")).build());
+            try {
+                return Optional.of(Company.builder().withID(iD)
+                        .withName(rs.getString("namecompany")).build());
+            } catch (ProblemListException e) {
+                throw new AbsurdException("Could not instantiate a company;"
+                        + " the database schema should" + " prevent this");
+            }
         }
+    }
+
+    private String formatOrder(Order order) {
+        String orderBy;
+        switch (order.getOrderBy()) {
+        case COMPANY:
+            orderBy = " company.name ";
+            break;
+        case COMPUTER:
+            orderBy = " computer.name ";
+            break;
+        case DISCONTINUED:
+            orderBy = " discontinued ";
+            break;
+        case INTRODUCED:
+            orderBy = " introduced ";
+            break;
+        default:
+            throw new RuntimeException(
+                    "You forgot to complete the switch in ComputerDAOImpl");
+        }
+        String orderString;
+        if (order.isAsc()) {
+            orderString = " asc ";
+        } else {
+            orderString = " desc ";
+        }
+        return orderBy + orderString;
     }
 }

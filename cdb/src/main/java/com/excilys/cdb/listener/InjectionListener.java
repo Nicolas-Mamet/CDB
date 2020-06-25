@@ -9,6 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.excilys.cdb.cli.AbstractServiceUser;
+import com.excilys.cdb.model.Company;
+import com.excilys.cdb.model.Computer;
+import com.excilys.cdb.model.Page;
+import com.excilys.cdb.model.validator.CompanyValidator;
+import com.excilys.cdb.model.validator.ComputerValidator;
+import com.excilys.cdb.model.validator.PageValidator;
 import com.excilys.cdb.persistence.implementation.CompanyDAOImpl;
 import com.excilys.cdb.persistence.implementation.ComputerDAOImpl;
 import com.excilys.cdb.persistence.implementation.DAOFactory;
@@ -52,6 +58,9 @@ public class InjectionListener implements ServletContextListener {
         AbstractDAOUser.setDAOFactory(daoFactory);
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "trace");
         logger.info("Injection OK");
+        Page.PageBuilder.setValidator(new PageValidator());
+        Computer.ComputerBuilder.setValidator(new ComputerValidator());
+        Company.CompanyBuilder.setValidator(new CompanyValidator());
     }
 
     @Override

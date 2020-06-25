@@ -4,12 +4,17 @@ import java.util.Optional;
 
 public class Problem {
 
+    @Override
+    public String toString() {
+        return "Problem [origin=" + origin + ", nature=" + nature + "]";
+    }
+
     String origin;
     Nature nature;
 
     public enum Nature {
         NOTADATE, NOTALONG, WRONGORDER, NONAME, NOCOMPUTER, NOCOMPANY,
-        BEFORE1970
+        BEFORE1970, WRONGOFFSET, WRONGLIMIT
     }
 
     private Problem(Nature nature, String origin) {
@@ -56,5 +61,13 @@ public class Problem {
 
     public static Problem createBefore1970(String date) {
         return new Problem(Nature.BEFORE1970, date);
+    }
+
+    public static Problem createWrongOffset(long offset) {
+        return new Problem(Nature.WRONGOFFSET, offset + "");
+    }
+
+    public static Problem createWrongLimit(long limit) {
+        return new Problem(Nature.WRONGLIMIT, limit + "");
     }
 }

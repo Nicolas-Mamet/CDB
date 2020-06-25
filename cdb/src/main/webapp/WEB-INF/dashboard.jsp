@@ -62,12 +62,28 @@
               </a>
             </span>
             </th>
-            <th>Computer name</th>
-            <th>Introduced date</th>
+            <th>
+              Computer name
+              <a href="?offset=0&limit=${pagemanager.limit }&search=${search }&orderby=computer&order=asc" style="font-size:xx-large">&uarr;</a>
+              <a href="?offset=0&limit=${pagemanager.limit }&search=${search }&orderby=computer&order=desc" style="font-size:xx-large">&darr;</a>
+            </th>
+            <th>
+              Introduced date
+              <a href="?offset=0&limit=${pagemanager.limit }&search=${search }&orderby=introduced&order=asc" style="font-size:xx-large">&uarr;</a>
+              <a href="?offset=0&limit=${pagemanager.limit }&search=${search }&orderby=introduced&order=desc" style="font-size:xx-large">&darr;</a>
+            </th>
             <!-- Table header for Discontinued Date -->
-            <th>Discontinued date</th>
+            <th>
+              Discontinued date
+              <a href="?offset=0&limit=${pagemanager.limit }&search=${search }&orderby=discontinued&order=asc" style="font-size:xx-large">&uarr;</a>
+              <a href="?offset=0&limit=${pagemanager.limit }&search=${search }&orderby=discontinued&order=desc" style="font-size:xx-large">&darr;</a>
+            </th>
             <!-- Table header for Company -->
-            <th>Company</th>
+            <th>
+              Company
+              <a href="?offset=0&limit=${pagemanager.limit }&search=${search }&orderby=company&order=asc" style="font-size:xx-large">&uarr;</a>
+              <a href="?offset=0&limit=${pagemanager.limit }&search=${search }&orderby=company&order=desc" style="font-size:xx-large">&darr;</a>
+            </th>
 
           </tr>
         </thead>
@@ -94,25 +110,25 @@
     <div class="container text-center">
         <ul class="pagination">
           <li>
-            <a href="?offset=0&limit=${pagemanager.limit}&search=${search }">1</a>
+            <a href="?offset=0&limit=${pagemanager.limit}&search=${search }&orderby=${orderby}&order=${order}">1</a>
           <li>
-            <a href="?offset=${pagemanager.previousOffset()}&limit=${pagemanager.limit}&search=${search }" aria-label="Previous">
+            <a href="?offset=${pagemanager.previousOffset()}&limit=${pagemanager.limit}&search=${search }&orderby=${orderby}&order=${order}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
           <li>
-            <a href="?offset=${pagemanager.nextOffset()}&limit=${pagemanager.limit}&search=${search }" aria-label="Next">
+            <a href="?offset=${pagemanager.nextOffset()}&limit=${pagemanager.limit}&search=${search }&orderby=${orderby}&order=${order}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
           <li>
-            <a href="?offset=${pagemanager.lastPageOffset()}&limit=${pagemanager.limit}&search=${search }">${pagemanager.nbPages()}</a>
+            <a href="?offset=${pagemanager.lastPageOffset()}&limit=${pagemanager.limit}&search=${search }&orderby=${orderby}&order=${order}">${pagemanager.nbPages()}</a>
           <li>
         </ul>
       <div class="btn-group btn-group-sm pull-right" role="group">
-        <a href="?offset=${pagemanager.offset}&limit=10&search=${search }"><button type="button" class="btn btn-default">10</button></a>
-        <a href="?offset=${pagemanager.offset}&limit=50&search=${search }"><button type="button" class="btn btn-default">50</button></a>
-        <a href="?offset=${pagemanager.offset}&limit=100&search=${search }"><button type="button" class="btn btn-default">100</button></a>
+        <a href="?offset=${pagemanager.offset}&limit=10&search=${search }&orderby=${orderby}&order=${order}"><button type="button" class="btn btn-default">10</button></a>
+        <a href="?offset=${pagemanager.offset}&limit=50&search=${search }&orderby=${orderby}&order=${order}"><button type="button" class="btn btn-default">50</button></a>
+        <a href="?offset=${pagemanager.offset}&limit=100&search=${search }&orderby=${orderby}&order=${order}"><button type="button" class="btn btn-default">100</button></a>
       </div>
     </div>
   </footer>

@@ -35,7 +35,7 @@
               </div>
               <div class="form-group">
                   <label for="discontinued">Discontinued date</label>
-                  <input type="date" class="form-control" id="discontinued" placeholder="Discontinued date" name="discontinued" value=""${computer.discontinued}" min="1970-01-01" max="3000-01-01">
+                  <input type="date" class="form-control" id="discontinued" placeholder="Discontinued date" name="discontinued" value="${computer.discontinued}" min="1970-01-01" max="3000-01-01">
               </div>
               <div class="form-group">
                   <label for="companyId">Company</label>

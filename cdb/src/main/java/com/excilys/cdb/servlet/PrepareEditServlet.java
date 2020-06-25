@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.excilys.cdb.dto.CompanyDTO;
 import com.excilys.cdb.dto.ComputerDTO;
 import com.excilys.cdb.exceptions.DBException;
@@ -21,6 +24,9 @@ import com.excilys.cdb.exceptions.NotLongException;
 @WebServlet("/editcomputer")
 public class PrepareEditServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(PrepareEditServlet.class);
 
     /**
      * @see HttpServlet#HttpServlet()
@@ -53,8 +59,11 @@ public class PrepareEditServlet extends HttpServlet {
             try {
                 ComputerDTO computer =
                         ServletCommonFunction.getComputer(idString.get()).get();
+                LOGGER.debug("edit computer : initial state of computer "
+                        + computer.toString());
                 request.setAttribute("computer", computer);
-                ServletCommonFunction.forward(request, response, Address.VIEWEDIT);
+                ServletCommonFunction.forward(request, response,
+                        Address.VIEWEDIT);
             } catch (NotLongException e) {
                 ServletCommonFunction.dealWithAbsurdity(response, request);
             } catch (DBException e) {

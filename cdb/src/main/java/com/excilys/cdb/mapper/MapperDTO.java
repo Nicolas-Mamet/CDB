@@ -2,6 +2,7 @@ package com.excilys.cdb.mapper;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ public class MapperDTO {
             return Optional.empty();
         } else {
             return Optional.of(ComputerDTO.builder()
-                    .withId(computer.getID() + "").withName(computer.getName())
+                    .withId(computer.getId() + "").withName(computer.getName())
                     .withDiscontinued(Optional
                             .ofNullable(computer.getDiscontinued())
                             .map(d -> d.toLocalDate().toString()).orElse(null))
@@ -73,11 +74,17 @@ public class MapperDTO {
     }
 
     public static Optional<Company> DTOToCompany(CompanyDTO company)
-            throws NotLongException {
+            throws ProblemListException {
         if (company == null) {
             return Optional.empty();
         } else {
-            long iD = Mapper.mapLong(company.getId());
+            long iD;
+            try {
+                iD = Mapper.mapLong(company.getId());
+            } catch (NotLongException e) {
+                throw new ProblemListException(
+                        Arrays.asList(Problem.createNotALong(company.getId())));
+            }
             if (iD == 0) {
                 return Optional.empty();
             } else {
@@ -98,9 +105,12 @@ public class MapperDTO {
             if (problemList.size() > 0) {
                 throw new ProblemListException(problemList);
             } else {
-                return Optional.of(Page.createPage(
-                        limit.orElseThrow(AbsurdOptionalException::new),
-                        offset.orElseThrow(AbsurdOptionalException::new)));
+                return Optional.of(Page.builder()
+                        .withLimit(
+                                limit.orElseThrow(AbsurdOptionalException::new))
+                        .withOffset(offset
+                                .orElseThrow(AbsurdOptionalException::new))
+                        .build());
             }
         }
     }
@@ -120,8 +130,8 @@ public class MapperDTO {
         Optional<Company> company = Optional.empty();
         try {
             company = MapperDTO.DTOToCompany(companyDTO);
-        } catch (NotLongException e) {
-            problemList.add(Problem.createNotALong(companyDTO.getId()));
+        } catch (ProblemListException e) {
+            problemList.addAll(e.getList());
         }
         return company;
     }

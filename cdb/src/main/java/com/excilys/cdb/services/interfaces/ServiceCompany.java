@@ -7,7 +7,6 @@ import com.excilys.cdb.dto.CompanyDTO;
 import com.excilys.cdb.dto.PageDTO;
 import com.excilys.cdb.exceptions.DBException;
 import com.excilys.cdb.exceptions.InvalidCompanyException;
-import com.excilys.cdb.exceptions.InvalidPageException;
 import com.excilys.cdb.exceptions.NotLongException;
 import com.excilys.cdb.exceptions.ProblemListException;
 
@@ -15,7 +14,7 @@ public interface ServiceCompany {
     List<CompanyDTO> getCompanies() throws DBException;
 
     List<CompanyDTO> getCompanies(PageDTO page)
-            throws InvalidPageException, ProblemListException, DBException;
+            throws ProblemListException, DBException;
 
     Optional<String> getCompanyName(long iD) throws DBException;
 

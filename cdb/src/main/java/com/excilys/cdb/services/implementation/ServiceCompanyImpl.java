@@ -9,7 +9,6 @@ import com.excilys.cdb.dto.CompanyDTO;
 import com.excilys.cdb.dto.PageDTO;
 import com.excilys.cdb.exceptions.DBException;
 import com.excilys.cdb.exceptions.InvalidCompanyException;
-import com.excilys.cdb.exceptions.InvalidPageException;
 import com.excilys.cdb.exceptions.NotLongException;
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.mapper.Mapper;
@@ -22,11 +21,8 @@ public final class ServiceCompanyImpl extends AbstractDAOUser
 
     @Override
     public List<CompanyDTO> getCompanies(PageDTO pageDTO)
-            throws InvalidPageException, ProblemListException, DBException {
+            throws ProblemListException, DBException {
         Page page = MapperDTO.DTOToPage(pageDTO).orElse(null);
-        if (page == null || page.getOffset() < 0 || page.getLimit() < 1) {
-            throw new InvalidPageException();
-        }
         try {
             return getDAOFactory().getCompanyDAO().getPageOfCompanies(page)
                     .stream().filter(c -> c != null)

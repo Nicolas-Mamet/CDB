@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.excilys.cdb.dto.ComputerDTO;
 import com.excilys.cdb.dto.PageDTO;
 import com.excilys.cdb.exceptions.AbsurdOptionalException;
@@ -19,6 +22,7 @@ import com.excilys.cdb.exceptions.NotLongException;
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.mapper.Mapper;
 import com.excilys.cdb.services.interfaces.ServiceComputer;
+import com.excilys.cdb.servlet.Order.OrderBy;
 import com.excilys.cdb.util.PageManager;
 
 /**
@@ -29,6 +33,9 @@ public class PrepareDashboard extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final String DEFAULT_OFFSET = "0";
     private static final String DEFAULT_LIMIT = "10";
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(PrepareDashboard.class);
 
     /**
      * @see HttpServlet#HttpServlet()
@@ -51,11 +58,12 @@ public class PrepareDashboard extends HttpServlet {
         String limit = getLimit(request);
         Optional<String> search =
                 ServletCommonFunction.getParameter(request, "search");
+        Optional<Order> order = getOrder(request);
         PageDTO pageDTO =
                 PageDTO.builder().withOffset(offset).withLimit(limit).build();
         try {
             prepareAndForward(request, response, serviceComputer, offset, limit,
-                    pageDTO, search);
+                    pageDTO, search, order);
         } catch (Exception e) {
             ServletCommonFunction.dealWithException(e, request, response);
         }
@@ -107,9 +115,11 @@ public class PrepareDashboard extends HttpServlet {
     private void prepareAndForward(HttpServletRequest request,
             HttpServletResponse response, ServiceComputer serviceComputer,
             String offset, String limit, PageDTO pageDTO,
-            Optional<String> search) throws ServletException, IOException {
+            Optional<String> search, Optional<Order> order)
+            throws ServletException, IOException {
         try {
-            prepare(request, serviceComputer, offset, limit, pageDTO, search);
+            prepare(request, serviceComputer, offset, limit, pageDTO, search,
+                    order);
             ServletCommonFunction.forward(request, response, Address.DASHBOARD);
         } catch (Exception e) {
             ServletCommonFunction.dealWithException(e, request, response);
@@ -118,22 +128,65 @@ public class PrepareDashboard extends HttpServlet {
 
     private void prepare(HttpServletRequest request,
             ServiceComputer serviceComputer, String offset, String limit,
-            PageDTO pageDTO, Optional<String> search)
+            PageDTO pageDTO, Optional<String> search, Optional<Order> order)
             throws InvalidPageException, ProblemListException, DBException {
         List<ComputerDTO> listComputer;
         long nbComputers;
         if (search.isPresent()) {
-            listComputer = serviceComputer.getComputers(pageDTO, search.get());
-            request.setAttribute("search", search.get());
+            if (order.isPresent()) {
+                listComputer = serviceComputer.getComputers(pageDTO,
+                        search.get(), order.get());
+                request.setAttribute("search", search.get());
+            } else {
+                listComputer =
+                        serviceComputer.getComputers(pageDTO, search.get());
+                request.setAttribute("search", search.get());
+            }
             nbComputers = getNbComputers(serviceComputer, search.get());
         } else {
-            listComputer = serviceComputer.getComputers(pageDTO);
+            if (order.isPresent()) {
+                listComputer =
+                        serviceComputer.getComputers(pageDTO, order.get());
+            } else {
+                listComputer = serviceComputer.getComputers(pageDTO);
+            }
             nbComputers = getNbComputers(serviceComputer);
         }
         request.setAttribute("list", listComputer);
+        setOrder(request, order);
         PageManager pageManager = buildPageManager(offset, limit, nbComputers)
                 .orElseThrow(AbsurdOptionalException::new);
         request.setAttribute("pagemanager", pageManager);
+    }
+
+    private void setOrder(HttpServletRequest request, Optional<Order> order) {
+        if (order.isEmpty()) {
+            request.setAttribute("orderby", "");
+            request.setAttribute("order", "");
+        } else {
+            if (order.get().isAsc()) {
+                request.setAttribute("order", "asc");
+            } else {
+                request.setAttribute("order", "desc");
+            }
+            switch (order.get().getOrderBy()) {
+            case COMPANY:
+                request.setAttribute("orderby", "company");
+                break;
+            case COMPUTER:
+                request.setAttribute("orderby", "computer");
+                break;
+            case DISCONTINUED:
+                request.setAttribute("orderby", "discontinued");
+                break;
+            case INTRODUCED:
+                request.setAttribute("orderby", "introduced");
+                break;
+            default:
+                throw new RuntimeException(
+                        "You forgot to complete the switch in PrepareDashboard");
+            }
+        }
     }
 
     private long getNbComputers(ServiceComputer serviceComputer, String search)
@@ -141,4 +194,46 @@ public class PrepareDashboard extends HttpServlet {
         return serviceComputer.countComputers(search);
     }
 
+    private Optional<Order> getOrder(HttpServletRequest request) {
+        Optional<String> orderby =
+                ServletCommonFunction.getParameter(request, "orderby");
+        Optional<String> order =
+                ServletCommonFunction.getParameter(request, "order");
+        if (orderby.isEmpty() || order.isEmpty()) {
+            LOGGER.debug("No order provided to dashboard");
+            return Optional.empty();
+        }
+        OrderBy orderBy;
+        switch (orderby.get()) {
+        case "computer":
+            orderBy = OrderBy.COMPUTER;
+            break;
+        case "introduced":
+            orderBy = OrderBy.INTRODUCED;
+            break;
+        case "discontinued":
+            orderBy = OrderBy.DISCONTINUED;
+            break;
+        case "company":
+            orderBy = OrderBy.COMPANY;
+            break;
+        default:
+            LOGGER.debug("Orderby was found but contains an incorrect value");
+            return Optional.empty();
+        }
+        boolean asc;
+        switch (order.get()) {
+        case "asc":
+            asc = true;
+            break;
+        case "desc":
+            asc = false;
+            break;
+        default:
+            LOGGER.debug("order was found but contains an incorrect value");
+            return Optional.empty();
+        }
+        return Optional
+                .of(Order.builder().withOrderBy(orderBy).withAsc(asc).build());
+    }
 }

@@ -2,15 +2,20 @@ package com.excilys.cdb.persistence.interfaces;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import com.excilys.cdb.exceptions.CorruptComputersException;
+import com.excilys.cdb.exceptions.DBException;
 import com.excilys.cdb.model.Computer;
 import com.excilys.cdb.model.Page;
+import com.excilys.cdb.servlet.Order;
 
 public interface ComputerDAO {
 
-    List<Computer> getComputers() throws SQLException;
+    List<Computer> getComputers()
+            throws SQLException, CorruptComputersException;
 
     List<Computer> getComputers(String search) throws SQLException;
 
@@ -66,4 +71,10 @@ public interface ComputerDAO {
             throws SQLException;
 
     void setDataSource(SQLDataSource dataSource);
+
+    Collection<Computer> searchComputers(Page page, String search, Order order)
+            throws DBException;
+
+    Collection<Computer> searchComputers(Page page, Order order)
+            throws DBException;
 }

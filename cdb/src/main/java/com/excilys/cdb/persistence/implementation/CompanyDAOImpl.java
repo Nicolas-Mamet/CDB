@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.excilys.cdb.exceptions.AbsurdException;
+import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.Company;
 import com.excilys.cdb.model.Page;
 import com.excilys.cdb.persistence.interfaces.CompanyDAO;
@@ -46,8 +48,14 @@ public final class CompanyDAOImpl extends AbstractDAOUser
                 ResultSet resultSet =
                         statement.executeQuery(COMPANY_LIST_QUERY);) {
             while (resultSet.next()) {
-                companies.add(Company.builder().withID(resultSet.getInt("id"))
-                        .withName(resultSet.getString("name")).build());
+                try {
+                    companies.add(Company.builder()
+                            .withID(resultSet.getInt("id"))
+                            .withName(resultSet.getString("name")).build());
+                } catch (ProblemListException e) {
+                    throw new AbsurdException("Could not instantiate a company;"
+                            + " the database schema should" + " prevent this");
+                }
             }
         }
         return companies;
@@ -84,9 +92,16 @@ public final class CompanyDAOImpl extends AbstractDAOUser
             preparedStatement.setLong(2, page.getOffset());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    companies.add(Company.builder()
-                            .withID(resultSet.getInt("id"))
-                            .withName(resultSet.getString("name")).build());
+                    try {
+                        companies.add(Company.builder()
+                                .withID(resultSet.getInt("id"))
+                                .withName(resultSet.getString("name")).build());
+                    } catch (ProblemListException e) {
+                        throw new AbsurdException(
+                                "Could not instantiate a company;"
+                                        + " the database schema should"
+                                        + " prevent this");
+                    }
                 }
             }
         }
