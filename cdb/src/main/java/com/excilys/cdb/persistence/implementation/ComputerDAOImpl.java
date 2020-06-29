@@ -1,14 +1,10 @@
 package com.excilys.cdb.persistence.implementation;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -18,10 +14,10 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.excilys.cdb.exceptions.AbsurdException;
-import com.excilys.cdb.exceptions.CorruptComputerException;
 import com.excilys.cdb.exceptions.CorruptComputersException;
 import com.excilys.cdb.exceptions.DBException;
 import com.excilys.cdb.exceptions.Problem;
@@ -31,8 +27,8 @@ import com.excilys.cdb.model.Company;
 import com.excilys.cdb.model.Computer;
 import com.excilys.cdb.model.Computer.ComputerBuilder;
 import com.excilys.cdb.model.Page;
+import com.excilys.cdb.persistence.implementation.mapper.ComputerMapper;
 import com.excilys.cdb.persistence.interfaces.ComputerDAO;
-import com.excilys.cdb.persistence.interfaces.DataSource;
 import com.excilys.cdb.servlet.Order;
 
 @Repository
@@ -42,7 +38,10 @@ public final class ComputerDAOImpl implements ComputerDAO {
     private Logger logger = LoggerFactory.getLogger(CompanyDAOImpl.class);
 
     @Autowired
-    private DataSource dataSource;
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ComputerMapper computerMapper;
 
     private ComputerDAOImpl() {
     }
@@ -127,277 +126,154 @@ public final class ComputerDAOImpl implements ComputerDAO {
     private static final String DELETE_ALL_QUERY =
             "DELETE FROM computer WHERE company_id = ?";
 
-    private static Computer getComputerFromResultSet(ResultSet rs)
-            throws SQLException, CorruptComputerException {
-        ComputerBuilder bob =
-                Computer.builder().withName(rs.getString("nameComputer"))
-                        .withID(rs.getLong("idcomputer"));
-        Mapper.toLocalDateTime(rs.getTimestamp("discontinued"))
-                .ifPresent(date -> bob.withDiscontinued(date));
-        Mapper.toLocalDateTime(rs.getTimestamp("introduced"))
-                .ifPresent(date -> bob.withIntroduced(date));
-        getCompanyFromResultSet(rs)
-                .ifPresent(company -> bob.withCompany(company));
+    @Override
+    public List<Computer> getComputers() throws DBException {
         try {
-            return bob.build();
-        } catch (ProblemListException e) {
-            throw new CorruptComputerException(e.getList());
+            List<ComputerBuilder> builders =
+                    jdbcTemplate.query(COMPUTER_LIST_QUERY, computerMapper);
+            return buildComputers(builders);
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
     }
 
     @Override
-    public List<Computer> getComputers() throws SQLException {
-        List<Computer> computers = new ArrayList<>();
-        List<List<Problem>> corruptComputers = new ArrayList<>();
-        try (Connection connection = dataSource.getConnection();
-                Statement statement = connection.createStatement();
-                ResultSet resultSet =
-                        statement.executeQuery(COMPUTER_LIST_QUERY);) {
-            while (resultSet.next()) {
-                try {
-                    computers.add(getComputerFromResultSet(resultSet));
-                } catch (CorruptComputerException e) {
-                    corruptComputers.add(e.getProblemList());
-                }
-            }
-            if (corruptComputers.size() > 0) {
-                logger.error("Could not instantiate computers from database : "
-                        + corruptComputers.toString());
-                throw new CorruptComputersException(corruptComputers);
-            }
-        }
-        return computers;
-    }
-
-    @Override
-    public List<Computer> getComputers(String search) throws SQLException {
-        List<Computer> computers = new ArrayList<>();
-        List<List<Problem>> corruptComputers = new ArrayList<>();
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(SEARCH_LIST_QUERY);) {
-            preparedStatement.setString(1, "%" + search + "%");
-            try (ResultSet resultSet = preparedStatement.executeQuery();) {
-                while (resultSet.next()) {
-                    try {
-                        computers.add(getComputerFromResultSet(resultSet));
-                    } catch (CorruptComputerException e) {
-                        corruptComputers.add(e.getProblemList());
-                    }
-                }
-                if (corruptComputers.size() > 0) {
-                    logger.error(
-                            "Could not instantiate computers from database : "
-                                    + corruptComputers.toString());
-                    throw new CorruptComputersException(corruptComputers);
-                }
-                if (corruptComputers.size() > 0) {
-                    logger.error(
-                            "Could not instantiate computers from database : "
-                                    + corruptComputers.toString());
-                    throw new CorruptComputersException(corruptComputers);
-                }
-                return computers;
-            }
+    public List<Computer> getComputers(String search) throws DBException {
+        try {
+            List<ComputerBuilder> builders = jdbcTemplate.query(
+                    SEARCH_LIST_QUERY, new Object[] { "%" + search + "%" },
+                    computerMapper);
+            return buildComputers(builders);
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
     }
 
     @Override
-    public List<Computer> getPageOfComputers(Page page) throws SQLException {
-        List<Computer> computers = new ArrayList<>();
-        List<List<Problem>> corruptComputers = new ArrayList<>();
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(PAGE_LIST_QUERY);) {
-            preparedStatement.setLong(1, page.getLimit());
-            preparedStatement.setLong(2, page.getOffset());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    try {
-                        computers.add(getComputerFromResultSet(resultSet));
-                    } catch (CorruptComputerException e) {
-                        corruptComputers.add(e.getProblemList());
-                    }
-                }
-            }
-            if (corruptComputers.size() > 0) {
-                logger.error("Could not instantiate computers from database : "
-                        + corruptComputers.toString());
-                throw new CorruptComputersException(corruptComputers);
-            }
+    public List<Computer> getPageOfComputers(Page page) throws DBException {
+        List<ComputerBuilder> builders = jdbcTemplate.query(PAGE_LIST_QUERY,
+                new Object[] { page.getLimit(), page.getOffset() },
+                computerMapper);
+        try {
+            return buildComputers(builders);
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
-        return computers;
     }
 
     @Override
     public List<Computer> searchComputers(Page page, String search)
-            throws SQLException {
-        List<Computer> computers = new ArrayList<>();
-        List<List<Problem>> corruptComputers = new ArrayList<>();
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(COMPUTER_SEARCH_QUERY);) {
-            preparedStatement.setString(1, "%" + search + "%");
-            preparedStatement.setLong(2, page.getLimit());
-            preparedStatement.setLong(3, page.getOffset());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    try {
-                        computers.add(getComputerFromResultSet(resultSet));
-                    } catch (CorruptComputerException e) {
-                        corruptComputers.add(e.getProblemList());
-                    }
-                }
-            }
+            throws DBException {
+        List<ComputerBuilder> builders = jdbcTemplate
+                .query(COMPUTER_SEARCH_QUERY, (PreparedStatement ps) -> {
+                    ps.setString(1, "%" + search + "%");
+                    ps.setLong(2, page.getLimit());
+                    ps.setLong(3, page.getOffset());
+                }, computerMapper);
+        try {
+            return buildComputers(builders);
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
-        if (corruptComputers.size() > 0) {
-            logger.error("Could not instantiate computers from database : "
-                    + corruptComputers.toString());
-            throw new CorruptComputersException(corruptComputers);
-        }
-        return computers;
     }
 
     @Override
     public Collection<Computer> searchComputers(Page page, String search,
             Order order) throws DBException {
-        List<Computer> computers = new ArrayList<>();
-        List<List<Problem>> corruptComputers = new ArrayList<>();
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(
-                                String.format(COMPUTER_SEARCH_ORDER_QUERY,
-                                        formatOrder(order)));) {
-            preparedStatement.setString(1, "%" + search + "%");
-            preparedStatement.setLong(2, page.getLimit());
-            preparedStatement.setLong(3, page.getOffset());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    try {
-                        computers.add(getComputerFromResultSet(resultSet));
-                    } catch (CorruptComputerException e) {
-                        corruptComputers.add(e.getProblemList());
-                    }
-                }
-            }
-        } catch (SQLException e) {
+        List<ComputerBuilder> builders = jdbcTemplate.query(
+                String.format(COMPUTER_SEARCH_ORDER_QUERY, formatOrder(order)),
+                (PreparedStatement ps) -> {
+                    ps.setString(1, "%" + search + "%");
+                    ps.setLong(2, page.getLimit());
+                    ps.setLong(3, page.getOffset());
+                }, computerMapper);
+        try {
+            return buildComputers(builders);
+        } catch (DataAccessException e) {
             throw new DBException(e);
         }
-        if (corruptComputers.size() > 0) {
-            logger.error("Could not instantiate computers from database : "
-                    + corruptComputers.toString());
-            throw new CorruptComputersException(corruptComputers);
-        }
-        return computers;
     }
 
     @Override
     public Collection<Computer> searchComputers(Page page, Order order)
             throws DBException {
-        List<Computer> computers = new ArrayList<>();
-        List<List<Problem>> corruptComputers = new ArrayList<>();
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(String.format(
-                                COMPUTER_ORDER_QUERY, formatOrder(order)));) {
-            preparedStatement.setLong(1, page.getLimit());
-            preparedStatement.setLong(2, page.getOffset());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    try {
-                        computers.add(getComputerFromResultSet(resultSet));
-                    } catch (CorruptComputerException e) {
-                        corruptComputers.add(e.getProblemList());
-                    }
-                }
-            }
-        } catch (SQLException e) {
+        List<ComputerBuilder> builders = jdbcTemplate.query(
+                String.format(COMPUTER_ORDER_QUERY, formatOrder(order)),
+                (PreparedStatement ps) -> {
+                    ps.setLong(1, page.getLimit());
+                    ps.setLong(2, page.getOffset());
+                }, computerMapper);
+        try {
+            return buildComputers(builders);
+        } catch (DataAccessException e) {
             throw new DBException(e);
         }
-        if (corruptComputers.size() > 0) {
-            logger.error("Could not instantiate computers from database : "
-                    + corruptComputers.toString());
-            throw new CorruptComputersException(corruptComputers);
-        }
-        return computers;
     }
 
     @Override
-    public Optional<Computer> getComputer(long id) throws SQLException {
-        Optional<Computer> computer = Optional.empty();
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(GET_COMPUTER_QUERY);) {
-            preparedStatement.setLong(1, id);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    try {
-                        computer = Optional
-                                .of(getComputerFromResultSet(resultSet));
-                    } catch (CorruptComputerException e) {
-                        logger.error(
-                                "Could not instantiate computers from database : "
-                                        + e.getProblemList().toString());
-                        throw new CorruptComputersException(
-                                Arrays.asList(e.getProblemList()));
-                    }
-                }
+    public Optional<Computer> getComputer(long id) throws DBException {
+        try {
+            List<ComputerBuilder> builders = jdbcTemplate.query(
+                    GET_COMPUTER_QUERY, new Object[] { id }, computerMapper);
+            List<Computer> computers = buildComputers(builders);
+            if (computers.size() == 1) {
+                return Optional.of(computers.get(0));
+            } else {
+                return Optional.empty();
             }
-        }
-        return computer;
-    }
-
-    @Override
-    public void createComputer(Computer computer) throws SQLException {
-
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(CREATE_COMPUTER_QUERY);) {
-            prepareStatement(preparedStatement, computer);
-            preparedStatement.executeUpdate();
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
     }
 
     @Override
-    public boolean updateComputer(Computer computer) throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(UPDATE_COMPUTER_QUERY);) {
-            prepareStatement(preparedStatement, computer);
-            preparedStatement.setLong(5, computer.getId());
-            return preparedStatement.executeUpdate() == 1;
+    public void createComputer(Computer computer) throws DBException {
+        try {
+            jdbcTemplate.update(CREATE_COMPUTER_QUERY,
+                    ps -> prepareStatement(ps, computer));
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
     }
 
     @Override
-    public boolean deleteComputer(long id) throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(DELETE_COMPUTER_QUERY);) {
-            preparedStatement.setLong(1, id);
-            return preparedStatement.executeUpdate() == 1;
+    public boolean updateComputer(Computer computer) throws DBException {
+        try {
+            return 1 == jdbcTemplate.update(UPDATE_COMPUTER_QUERY, ps -> {
+                prepareStatement(ps, computer);
+                ps.setLong(5, computer.getId());
+            });
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
     }
 
     @Override
-    public void deleteComputers(List<Long> ids) throws SQLException {
+    public boolean deleteComputer(long id) throws DBException {
+        try {
+            return 1 == jdbcTemplate.update(DELETE_COMPUTER_QUERY,
+                    new Object[] { id });
+        } catch (DataAccessException e) {
+            throw new DBException(e);
+        }
+    }
+
+    @Override
+    public void deleteComputers(List<Long> ids) throws DBException {
         String query = prepareDeleteComputersQuery(ids.size());
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(query);) {
-            preparedStatement.setObject(1, ids);
-            prepareDeleteStatement(ids, preparedStatement);
-            preparedStatement.executeUpdate();
+        try {
+            jdbcTemplate.update(query, ps -> prepareDeleteStatement(ids, ps));
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
     }
 
     @Override
-    public void deleteComputersFromCompany(long id, Connection connection)
-            throws SQLException {
-        try (PreparedStatement preparedStatement =
-                connection.prepareStatement(DELETE_ALL_QUERY)) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.executeUpdate();
+    public void deleteComputersFromCompany(long id) throws DBException {
+        try {
+            jdbcTemplate.update(DELETE_ALL_QUERY, new Object[] { id });
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
     }
 
@@ -455,22 +331,6 @@ public final class ComputerDAOImpl implements ComputerDAO {
         setCompany(preparedStatement, computer.getCompany(), 4);
     }
 
-    private static Optional<Company> getCompanyFromResultSet(ResultSet rs)
-            throws SQLException {
-        long iD = rs.getLong("company_id");
-        if (iD == 0) {
-            return Optional.empty();
-        } else {
-            try {
-                return Optional.of(Company.builder().withID(iD)
-                        .withName(rs.getString("namecompany")).build());
-            } catch (ProblemListException e) {
-                throw new AbsurdException("Could not instantiate a company;"
-                        + " the database schema should" + " prevent this");
-            }
-        }
-    }
-
     private String formatOrder(Order order) {
         String orderBy;
         switch (order.getOrderBy()) {
@@ -498,4 +358,28 @@ public final class ComputerDAOImpl implements ComputerDAO {
         }
         return orderBy + orderString;
     }
+
+    private List<Computer> buildComputers(List<ComputerBuilder> builders) {
+        List<Computer> computers = new ArrayList<>();
+        List<List<Problem>> corruptComputers = new ArrayList<>();
+        for (ComputerBuilder bob : builders) {
+            try {
+                computers.add(bob.build());
+            } catch (ProblemListException e) {
+                corruptComputers.add(e.getList());
+            }
+        }
+        dealWithCorruptComputers(corruptComputers);
+        return computers;
+    }
+
+    private void dealWithCorruptComputers(
+            List<List<Problem>> corruptComputers) {
+        if (corruptComputers.size() > 0) {
+            logger.error("Could not instantiate computers from database : "
+                    + corruptComputers.toString());
+            throw new CorruptComputersException(corruptComputers);
+        }
+    }
+
 }

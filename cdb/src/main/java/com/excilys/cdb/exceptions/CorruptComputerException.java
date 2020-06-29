@@ -2,7 +2,7 @@ package com.excilys.cdb.exceptions;
 
 import java.util.List;
 
-public class CorruptComputerException extends Exception {
+public class CorruptComputerException extends RuntimeException {
 
     private final List<Problem> problemList;
 

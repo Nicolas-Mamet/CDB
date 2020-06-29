@@ -19,7 +19,7 @@ import com.excilys.cdb.model.Computer;
 import com.excilys.cdb.model.Page;
 
 public class MapperDTO {
-    public static Optional<ComputerDTO> ComputerToDTO(Computer computer) {
+    public static Optional<ComputerDTO> computerToDTO(Computer computer) {
         if (computer == null) {
             return Optional.empty();
         } else {
@@ -32,12 +32,12 @@ public class MapperDTO {
                             .ofNullable(computer.getIntroduced())
                             .map(d -> d.toLocalDate().toString()).orElse(null))
                     .withCompany(
-                            CompanyToDTO(computer.getCompany()).orElse(null))
+                            companyToDTO(computer.getCompany()).orElse(null))
                     .build());
         }
     }
 
-    public static Optional<CompanyDTO> CompanyToDTO(Company company) {
+    public static Optional<CompanyDTO> companyToDTO(Company company) {
         if (company == null) {
             return Optional.empty();
         } else {
@@ -47,7 +47,7 @@ public class MapperDTO {
 
     }
 
-    public static Optional<Computer> DTOToComputer(ComputerDTO computer)
+    public static Optional<Computer> dtoToComputer(ComputerDTO computer)
             throws ProblemListException {
         if (computer == null) {
             return Optional.empty();
@@ -73,7 +73,7 @@ public class MapperDTO {
         }
     }
 
-    public static Optional<Company> DTOToCompany(CompanyDTO company)
+    public static Optional<Company> dtoToCompany(CompanyDTO company)
             throws ProblemListException {
         if (company == null) {
             return Optional.empty();
@@ -94,7 +94,7 @@ public class MapperDTO {
         }
     }
 
-    public static Optional<Page> DTOToPage(PageDTO page)
+    public static Optional<Page> dtoToPage(PageDTO page)
             throws ProblemListException {
         if (page == null) {
             return Optional.empty();
@@ -129,7 +129,7 @@ public class MapperDTO {
             List<Problem> problemList) {
         Optional<Company> company = Optional.empty();
         try {
-            company = MapperDTO.DTOToCompany(companyDTO);
+            company = MapperDTO.dtoToCompany(companyDTO);
         } catch (ProblemListException e) {
             problemList.addAll(e.getList());
         }

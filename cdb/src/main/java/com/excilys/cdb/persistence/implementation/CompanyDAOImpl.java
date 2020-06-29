@@ -1,30 +1,29 @@
 package com.excilys.cdb.persistence.implementation;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.excilys.cdb.exceptions.AbsurdException;
-import com.excilys.cdb.exceptions.ProblemListException;
+import com.excilys.cdb.exceptions.DBException;
 import com.excilys.cdb.model.Company;
 import com.excilys.cdb.model.Page;
+import com.excilys.cdb.persistence.implementation.mapper.CompanyMapper;
 import com.excilys.cdb.persistence.interfaces.CompanyDAO;
 import com.excilys.cdb.persistence.interfaces.ComputerDAO;
-import com.excilys.cdb.persistence.interfaces.DataSource;
 
 @Repository
 public final class CompanyDAOImpl implements CompanyDAO {
 
     @Autowired
-    private DataSource dataSource;
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private CompanyMapper companyMapper;
 
     @Autowired
     private ComputerDAO computerDAO;
@@ -35,9 +34,6 @@ public final class CompanyDAOImpl implements CompanyDAO {
     private static final String PAGE_LIST_QUERY =
             "SELECT id, name FROM company" + " ORDER BY id LIMIT ? OFFSET ?";
 
-    private static final String GET_COMPANY_QUERY =
-            "SELECT id,name FROM company" + " WHERE id = ?";
-
     private static final String DELETE_COMPANY_QUERY =
             "DELETE FROM company where id = ?";
 
@@ -45,88 +41,36 @@ public final class CompanyDAOImpl implements CompanyDAO {
     }
 
     @Override
-    public List<Company> getCompanies() throws SQLException {
-        List<Company> companies = new ArrayList<>();
-
-        try (Connection connection = dataSource.getConnection();
-                Statement statement = connection.createStatement();
-                ResultSet resultSet =
-                        statement.executeQuery(COMPANY_LIST_QUERY);) {
-            while (resultSet.next()) {
-                try {
-                    companies.add(Company.builder()
-                            .withID(resultSet.getInt("id"))
-                            .withName(resultSet.getString("name")).build());
-                } catch (ProblemListException e) {
-                    throw new AbsurdException("Could not instantiate a company;"
-                            + " the database schema should" + " prevent this");
-                }
-            }
-        }
-        return companies;
-    }
-
-    @Override
-    public Optional<String> getCompanyName(long iD) throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(GET_COMPANY_QUERY);) {
-            statement.setLong(1, iD);
-            try (ResultSet resultSet = statement.executeQuery();) {
-                if (!resultSet.next()) {
-                    return Optional.empty();
-                } else {
-                    String name = resultSet.getString("name");
-                    if (name == null) {
-                        name = "";
-                    }
-                    return Optional.of(name);
-                }
-            }
+    public List<Company> getCompanies() throws DBException {
+        try {
+            return jdbcTemplate.query(COMPANY_LIST_QUERY, companyMapper);
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
     }
 
     @Override
-    public List<Company> getPageOfCompanies(Page page) throws SQLException {
-        List<Company> companies = new ArrayList<>();
-
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(PAGE_LIST_QUERY);) {
-            preparedStatement.setLong(1, page.getLimit());
-            preparedStatement.setLong(2, page.getOffset());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    try {
-                        companies.add(Company.builder()
-                                .withID(resultSet.getInt("id"))
-                                .withName(resultSet.getString("name")).build());
-                    } catch (ProblemListException e) {
-                        throw new AbsurdException(
-                                "Could not instantiate a company;"
-                                        + " the database schema should"
-                                        + " prevent this");
-                    }
-                }
-            }
+    public List<Company> getPageOfCompanies(Page page) throws DBException {
+        try {
+            return jdbcTemplate.query(PAGE_LIST_QUERY,
+                    (PreparedStatement ps) -> {
+                        ps.setLong(1, page.getLimit());
+                        ps.setLong(2, page.getOffset());
+                    }, companyMapper);
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
-        // System.out.println(companies.size());
-        return companies;
     }
 
     @Override
-    public boolean deleteCompany(long id) throws SQLException {
-        boolean ok;
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(false);
-            computerDAO.deleteComputersFromCompany(id, connection);
-            try (PreparedStatement statement =
-                    connection.prepareStatement(DELETE_COMPANY_QUERY)) {
-                statement.setLong(1, id);
-                ok = 1 == statement.executeUpdate();
-            }
-            connection.commit();
+    @Transactional
+    public boolean deleteCompany(long id) throws DBException {
+        computerDAO.deleteComputersFromCompany(id);
+        try {
+            return 1 == jdbcTemplate.update(DELETE_COMPANY_QUERY,
+                    new Object[] { id });
+        } catch (DataAccessException e) {
+            throw new DBException(e);
         }
-        return ok;
     }
 }

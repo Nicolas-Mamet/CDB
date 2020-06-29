@@ -11,6 +11,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 
 import com.excilys.cdb.logger.LoggerSetup;
+import com.excilys.cdb.spring.SpringConfig;
 
 /**
  * Servlet Filter implementation class AddressFilter
@@ -20,6 +21,7 @@ public class AddressFilter implements Filter {
 
     static {
         LoggerSetup.setDefaultLevelToTrace();
+        SpringConfig.init();
     }
 
     /**

@@ -3,7 +3,6 @@ package com.excilys.cdb.services.implementation;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,12 +49,6 @@ public class ServiceCompanyImplTest {
 
         private static final AnnotationConfigApplicationContext APP_CONTEXT =
                 new AnnotationConfigApplicationContext(SpringConfig.class);
-
-//        private ICompanyValidator companyValidator;
-//
-//        private IPageValidator pageValidator;
-//
-//        private IComputerValidator computerValidator;
 
         @Bean
         public ICompanyValidator getCompanyValidator() {
@@ -134,7 +127,7 @@ public class ServiceCompanyImplTest {
         try {
             Mockito.when(companyDAO.getPageOfCompanies(page))
                     .thenReturn(companies);
-        } catch (SQLException e1) {
+        } catch (DBException e1) {
             Assert.fail("Absurd");
         }
         try {
@@ -168,7 +161,7 @@ public class ServiceCompanyImplTest {
             Mockito.when(companyDAO.getPageOfCompanies(page))
                     .thenReturn(new ArrayList<Company>());
 
-        } catch (SQLException e1) {
+        } catch (DBException e1) {
             Assert.fail("Absurd");
         }
         try {
