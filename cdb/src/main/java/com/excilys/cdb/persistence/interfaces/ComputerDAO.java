@@ -70,8 +70,6 @@ public interface ComputerDAO {
     void deleteComputersFromCompany(long id, Connection connection)
             throws SQLException;
 
-    void setDataSource(SQLDataSource dataSource);
-
     Collection<Computer> searchComputers(Page page, String search, Order order)
             throws DBException;
 

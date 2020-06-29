@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import com.excilys.cdb.cli.AbstractServiceUser;
 import com.excilys.cdb.dto.CompanyDTO;
 import com.excilys.cdb.dto.ComputerDTO;
 import com.excilys.cdb.dto.PageDTO;
@@ -23,17 +23,43 @@ import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.services.interfaces.ServiceCompany;
 import com.excilys.cdb.services.interfaces.ServiceComputer;
 
-public class ServletCommonFunction extends AbstractServiceUser {
+public final class ServletCommonFunction {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ServletCommonFunction.class);
 
-    public static ServiceComputer getComputerService() {
-        return getServiceFactory().getServiceComputer();
+    /**
+     * effectively final
+     */
+    private static ServiceComputer serviceComputer;
+
+    /**
+     * effectively final
+     */
+    private static ServiceCompany serviceCompany;
+
+    /**
+     * Used to initialize the static attributes of ServletCommonFunction; should
+     * only be instantiated once to make sure the services fields are
+     * effectively final
+     *
+     */
+    @Component
+    private static class Initializer {
+        private Initializer(ServiceComputer serviceComputer,
+                ServiceCompany serviceCompany) {
+            ServletCommonFunction.serviceComputer = serviceComputer;
+            ServletCommonFunction.serviceCompany = serviceCompany;
+        }
     }
 
     public static ServiceCompany getCompanyService() {
-        return getServiceFactory().getServiceCompany();
+        return serviceCompany;
+    }
+
+    public static ServiceComputer getComputerService() {
+        LOGGER.debug("computer service : " + serviceComputer.toString());
+        return serviceComputer;
     }
 
     public static void forward(HttpServletRequest request,
@@ -84,12 +110,12 @@ public class ServletCommonFunction extends AbstractServiceUser {
     }
 
     public static List<CompanyDTO> getCompanies() throws DBException {
-        return getCompanyService().getCompanies();
+        return serviceCompany.getCompanies();
     }
 
     public static Optional<ComputerDTO> getComputer(String id)
             throws NotLongException, DBException {
-        return getComputerService().getComputer(id);
+        return serviceComputer.getComputer(id);
     }
 
     /**
@@ -115,17 +141,6 @@ public class ServletCommonFunction extends AbstractServiceUser {
             return Optional.of(CompanyDTO.builder().withId(id).build());
         }
     }
-
-//    public static ServiceFactory getServiceFactory(ServletContext context)
-//            throws ServletException {
-//        Object serviceObject = context.getAttribute("serviceFactory");
-//        if (!(serviceObject instanceof ServiceFactory)) {
-//            throw new ServletException(new WrongInitializationException(
-//                    "Expected ServiceFactory and found "
-//                            + serviceObject.getClass().getSimpleName() + " )"));
-//        }
-//        return (ServiceFactory) serviceObject;
-//    }
 
     public static void dealWithException(Exception ex,
             HttpServletRequest request, HttpServletResponse response)

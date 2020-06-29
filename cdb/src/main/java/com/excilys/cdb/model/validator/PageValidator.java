@@ -3,11 +3,17 @@ package com.excilys.cdb.model.validator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.excilys.cdb.exceptions.Problem;
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.Page.PageBuilder;
 
-public class PageValidator implements Validator<PageBuilder> {
+@Component
+public class PageValidator implements IPageValidator {
+
+    private PageValidator() {
+    }
 
     @Override
     public void validate(PageBuilder builder) throws ProblemListException {

@@ -2,6 +2,8 @@ package com.excilys.cdb.model;
 
 import java.time.LocalDateTime;
 
+import org.springframework.stereotype.Component;
+
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.validator.Validator;
 
@@ -53,10 +55,25 @@ public final class Computer {
         private LocalDateTime introduced;
         private LocalDateTime discontinued;
         private Company company;
+
+        /**
+         * Performs validation before a computer is instantiated; should be
+         * final but we use BuilderInitializer instead to facilitate DI and
+         * testing. Should be effectively final.
+         */
         private static Validator<ComputerBuilder> validator;
 
-        public static void setValidator(Validator<ComputerBuilder> validator) {
-            ComputerBuilder.validator = validator;
+        /**
+         * Should only be instanciated once by Spring; set the static validator
+         * of the builder. Little trick to cope with Spring being unable to
+         * autowire static fields
+         *
+         */
+        @Component
+        private static class BuilderInitializer {
+            private BuilderInitializer(Validator<ComputerBuilder> validator) {
+                ComputerBuilder.validator = validator;
+            }
         }
 
         private ComputerBuilder() {
@@ -107,6 +124,10 @@ public final class Computer {
             return this;
         }
 
+        /**
+         * Throws a ProblemListException if the to-be-built company does not
+         * pass the validation
+         */
         public Computer build() throws ProblemListException {
             validator.validate(this);
             Computer computer = new Computer();

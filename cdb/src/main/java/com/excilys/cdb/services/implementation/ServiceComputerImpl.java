@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.excilys.cdb.dto.ComputerDTO;
 import com.excilys.cdb.dto.PageDTO;
@@ -20,11 +22,19 @@ import com.excilys.cdb.mapper.Mapper;
 import com.excilys.cdb.mapper.MapperDTO;
 import com.excilys.cdb.model.Computer;
 import com.excilys.cdb.model.Page;
+import com.excilys.cdb.persistence.interfaces.ComputerDAO;
 import com.excilys.cdb.services.interfaces.ServiceComputer;
 import com.excilys.cdb.servlet.Order;
 
-public class ServiceComputerImpl extends AbstractDAOUser
-        implements ServiceComputer {
+@Service
+public class ServiceComputerImpl implements ServiceComputer {
+
+    @Autowired
+    ComputerDAO computerDAO;
+
+    {
+        System.out.println(computerDAO);
+    }
 
     @SuppressWarnings("unused")
     private final Logger logger =
@@ -36,8 +46,8 @@ public class ServiceComputerImpl extends AbstractDAOUser
         Page page = MapperDTO.DTOToPage(pageDTO).orElse(null);
         try {
             logger.debug("getComputers without search nor order");
-            return getDAOFactory().getComputerDAO().getPageOfComputers(page)
-                    .stream().filter(c -> c != null)
+            return computerDAO.getPageOfComputers(page).stream()
+                    .filter(c -> c != null)
                     .map(c -> MapperDTO.ComputerToDTO(c).get())
                     .collect(Collectors.toList());
         } catch (SQLException e) {
@@ -51,8 +61,7 @@ public class ServiceComputerImpl extends AbstractDAOUser
         Page page = MapperDTO.DTOToPage(pageDTO).orElse(null);
         try {
             logger.debug("getComputers with search but no order");
-            return getDAOFactory().getComputerDAO()
-                    .searchComputers(page, search).stream()
+            return computerDAO.searchComputers(page, search).stream()
                     .filter(c -> c != null)
                     .map(c -> MapperDTO.ComputerToDTO(c).get())
                     .collect(Collectors.toList());
@@ -66,8 +75,7 @@ public class ServiceComputerImpl extends AbstractDAOUser
             Order order) throws ProblemListException, DBException {
         Page page = MapperDTO.DTOToPage(pageDTO).orElse(null);
         logger.debug("getComputers with search and order");
-        return getDAOFactory().getComputerDAO()
-                .searchComputers(page, search, order).stream()
+        return computerDAO.searchComputers(page, search, order).stream()
                 .filter(c -> c != null)
                 .map(c -> MapperDTO.ComputerToDTO(c).get())
                 .collect(Collectors.toList());
@@ -78,8 +86,8 @@ public class ServiceComputerImpl extends AbstractDAOUser
             throws DBException, ProblemListException {
         Page page = MapperDTO.DTOToPage(pageDTO).orElse(null);
         logger.debug("getComputers with order but no search");
-        return getDAOFactory().getComputerDAO().searchComputers(page, order)
-                .stream().filter(c -> c != null)
+        return computerDAO.searchComputers(page, order).stream()
+                .filter(c -> c != null)
                 .map(c -> MapperDTO.ComputerToDTO(c).get())
                 .collect(Collectors.toList());
 
@@ -90,7 +98,7 @@ public class ServiceComputerImpl extends AbstractDAOUser
             throws NotLongException, DBException {
         long iD = Mapper.mapLong(string);
         try {
-            return getDAOFactory().getComputerDAO().getComputer(iD)
+            return computerDAO.getComputer(iD)
                     .flatMap(c -> MapperDTO.ComputerToDTO(c));
         } catch (SQLException e) {
             throw new DBException(e);
@@ -102,7 +110,7 @@ public class ServiceComputerImpl extends AbstractDAOUser
             throws NotLongException, DBException {
         long iD = Mapper.mapLong(string);
         try {
-            return getDAOFactory().getComputerDAO().deleteComputer(iD);
+            return computerDAO.deleteComputer(iD);
         } catch (SQLException e) {
             throw new DBException(e);
         }
@@ -114,7 +122,7 @@ public class ServiceComputerImpl extends AbstractDAOUser
         Computer computer = MapperDTO.DTOToComputer(computerDTO)
                 .orElseThrow(NullComputerException::new);
         try {
-            getDAOFactory().getComputerDAO().createComputer(computer);
+            computerDAO.createComputer(computer);
         } catch (SQLException e) {
             throw new DBException(e);
         }
@@ -126,7 +134,7 @@ public class ServiceComputerImpl extends AbstractDAOUser
         Computer computer = MapperDTO.DTOToComputer(computerDTO)
                 .orElseThrow(NullComputerException::new);
         try {
-            return getDAOFactory().getComputerDAO().updateComputer(computer);
+            return computerDAO.updateComputer(computer);
         } catch (SQLException e) {
             throw new DBException(e);
         }
@@ -135,7 +143,7 @@ public class ServiceComputerImpl extends AbstractDAOUser
     @Override
     public long countComputers() throws DBException {
         try {
-            return getDAOFactory().getComputerDAO().getComputers().size();
+            return computerDAO.getComputers().size();
         } catch (SQLException e) {
             throw new DBException(e);
         }
@@ -144,8 +152,7 @@ public class ServiceComputerImpl extends AbstractDAOUser
     @Override
     public long countComputers(String search) throws DBException {
         try {
-            long count = getDAOFactory().getComputerDAO().getComputers(search)
-                    .size();
+            long count = computerDAO.getComputers(search).size();
             return count;
         } catch (SQLException e) {
             throw new DBException(e);
@@ -156,7 +163,7 @@ public class ServiceComputerImpl extends AbstractDAOUser
     public void deleteComputers(List<String> ids)
             throws ProblemListException, DBException {
         try {
-            getDAOFactory().getComputerDAO().deleteComputers(mapList(ids));
+            computerDAO.deleteComputers(mapList(ids));
         } catch (SQLException e) {
             throw new DBException(e);
         }

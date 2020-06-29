@@ -4,11 +4,17 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.excilys.cdb.exceptions.Problem;
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.Computer.ComputerBuilder;
 
-public class ComputerValidator implements Validator<ComputerBuilder> {
+@Component
+public class ComputerValidator implements IComputerValidator {
+
+    private ComputerValidator() {
+    }
 
     @Override
     public void validate(ComputerBuilder builder) throws ProblemListException {

@@ -9,23 +9,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import com.excilys.cdb.exceptions.AbsurdException;
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.Company;
 import com.excilys.cdb.model.Page;
 import com.excilys.cdb.persistence.interfaces.CompanyDAO;
-import com.excilys.cdb.persistence.interfaces.SQLDataSource;
-import com.excilys.cdb.services.implementation.AbstractDAOUser;
+import com.excilys.cdb.persistence.interfaces.ComputerDAO;
+import com.excilys.cdb.persistence.interfaces.DataSource;
 
-public final class CompanyDAOImpl extends AbstractDAOUser
-        implements CompanyDAO {
+@Repository
+public final class CompanyDAOImpl implements CompanyDAO {
 
-    private SQLDataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
-    @Override
-    public void setDataSource(SQLDataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    @Autowired
+    private ComputerDAO computerDAO;
 
     private static final String COMPANY_LIST_QUERY =
             "SELECT id, name FROM company ORDER BY name";
@@ -38,6 +40,9 @@ public final class CompanyDAOImpl extends AbstractDAOUser
 
     private static final String DELETE_COMPANY_QUERY =
             "DELETE FROM company where id = ?";
+
+    private CompanyDAOImpl() {
+    }
 
     @Override
     public List<Company> getCompanies() throws SQLException {
@@ -114,8 +119,7 @@ public final class CompanyDAOImpl extends AbstractDAOUser
         boolean ok;
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            getDAOFactory().getComputerDAO().deleteComputersFromCompany(id,
-                    connection);
+            computerDAO.deleteComputersFromCompany(id, connection);
             try (PreparedStatement statement =
                     connection.prepareStatement(DELETE_COMPANY_QUERY)) {
                 statement.setLong(1, id);

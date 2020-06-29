@@ -10,11 +10,17 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 
+import com.excilys.cdb.logger.LoggerSetup;
+
 /**
  * Servlet Filter implementation class AddressFilter
  */
 @WebFilter(urlPatterns = { "/*" })
 public class AddressFilter implements Filter {
+
+    static {
+        LoggerSetup.setDefaultLevelToTrace();
+    }
 
     /**
      * Default constructor.

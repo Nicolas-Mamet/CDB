@@ -6,17 +6,18 @@
 
   <groupId>com.excilys</groupId>
   <artifactId>cdb</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.4</version>
   <packaging>war</packaging>
 
   <name>cdb Maven Webapp</name>
   <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <url>http://cdb.excilys.com</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <spring.version>5.2.7.RELEASE</spring.version>
   </properties>
 
   <dependencies>
@@ -78,7 +79,22 @@
        <artifactId>HikariCP</artifactId>
        <version>3.4.5</version>
     </dependency>
-    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>${spring.version}</version>
+        <scope>test</scope>
+    </dependency>
     
   </dependencies>
 

@@ -3,10 +3,10 @@ package com.excilys.cdb.persistence.implementation;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.excilys.cdb.persistence.interfaces.SQLDataSource;
+import com.excilys.cdb.persistence.interfaces.DataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 
-public final class ConnectionDB implements SQLDataSource {
+public final class ConnectionDB implements DataSource {
 
     private static final String URL =
             "jdbc:mysql://localhost/computer-database-db";

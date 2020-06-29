@@ -2,6 +2,8 @@ package com.excilys.cdb.model;
 
 import javax.annotation.Generated;
 
+import org.springframework.stereotype.Component;
+
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.validator.Validator;
 
@@ -64,10 +66,25 @@ public class Page {
     public static final class PageBuilder {
         private long offset;
         private long limit;
+
+        /**
+         * Performs validation before a company is instantiated; should be final
+         * but we use BuilderInitializer instead to facilitate DI and testing.
+         * Should be effectively final.
+         */
         private static Validator<PageBuilder> validator;
 
-        public static void setValidator(Validator<PageBuilder> validator) {
-            PageBuilder.validator = validator;
+        /**
+         * Should only be instanciated once by Spring; set the static validator
+         * of the builder. Little trick to cope with Spring being unable to
+         * autowire static fields
+         *
+         */
+        @Component
+        private static class BuilderInitializer {
+            private BuilderInitializer(Validator<PageBuilder> validator) {
+                PageBuilder.validator = validator;
+            }
         }
 
         private PageBuilder() {
@@ -91,6 +108,10 @@ public class Page {
             return this;
         }
 
+        /**
+         * Throws a ProblemListException if the to-be-built page does not pass
+         * the validation
+         */
         public Page build() throws ProblemListException {
             validator.validate(this);
             return new Page(this);

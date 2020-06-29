@@ -1,5 +1,7 @@
 package com.excilys.cdb.model;
 
+import org.springframework.stereotype.Component;
+
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.model.validator.Validator;
 
@@ -22,7 +24,7 @@ public final class Company {
      * @param id
      * @param name
      */
-    Company(long id, String name) {
+    private Company(long id, String name) {
         super();
         this.id = id;
         this.name = name;
@@ -35,7 +37,26 @@ public final class Company {
     public static class CompanyBuilder {
         private long id;
         private String name;
+
+        /**
+         * Performs validation before a company is instantiated; should be final
+         * but we use BuilderInitializer instead to facilitate DI and testing.
+         * Should be effectively final.
+         */
         private static Validator<CompanyBuilder> validator;
+
+        /**
+         * Should only be instanciated once by Spring; set the static validator
+         * of the builder. Little trick to cope with Spring being unable to
+         * autowire static fields
+         *
+         */
+        @Component
+        private static class BuilderInitializer {
+            private BuilderInitializer(Validator<CompanyBuilder> validator) {
+                CompanyBuilder.validator = validator;
+            }
+        }
 
         public long getId() {
             return id;
@@ -43,10 +64,6 @@ public final class Company {
 
         public String getName() {
             return name;
-        }
-
-        public static void setValidator(Validator<CompanyBuilder> validator) {
-            CompanyBuilder.validator = validator;
         }
 
         private CompanyBuilder() {
@@ -62,6 +79,10 @@ public final class Company {
             return this;
         }
 
+        /**
+         * Throws a ProblemListException if the to-be-built company does not
+         * pass the validation
+         */
         public Company build() throws ProblemListException {
             validator.validate(this);
             return new Company(this.id, this.name);

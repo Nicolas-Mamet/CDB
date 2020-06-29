@@ -3,6 +3,8 @@ package com.excilys.cdb.cli;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.excilys.cdb.dto.CompanyDTO;
 import com.excilys.cdb.dto.ComputerDTO;
 import com.excilys.cdb.exceptions.DBException;
@@ -12,8 +14,16 @@ import com.excilys.cdb.exceptions.NullComputerException;
 import com.excilys.cdb.exceptions.Problem;
 import com.excilys.cdb.exceptions.ProblemListException;
 import com.excilys.cdb.mapper.Mapper;
+import com.excilys.cdb.services.interfaces.ServiceCompany;
+import com.excilys.cdb.services.interfaces.ServiceComputer;
 
-public class ServiceCaller extends AbstractServiceUser {
+public class ServiceCaller {
+
+    @Autowired
+    private static ServiceCompany serviceCompany;
+
+    @Autowired
+    private static ServiceComputer serviceComputer;
 
     private static ReadFromCL reader;
 
@@ -99,10 +109,9 @@ public class ServiceCaller extends AbstractServiceUser {
         while (tryAgain) {
             String iD = reader.getString("Computer ID :");
             try {
-                getServiceFactory().getServiceComputer().getComputer(iD)
-                        .ifPresentOrElse(
-                                computer -> System.out.println(computer),
-                                () -> System.out.println("No such computer"));
+                serviceComputer.getComputer(iD).ifPresentOrElse(
+                        computer -> System.out.println(computer),
+                        () -> System.out.println("No such computer"));
                 tryAgain = false;
             } catch (NotLongException e) {
                 tryAgain = errorHandling(iD + " is not a valid ID");
@@ -115,8 +124,7 @@ public class ServiceCaller extends AbstractServiceUser {
         while (tryAgain) {
             String iD = reader.getString("Computer ID :");
             try {
-                if (getServiceFactory().getServiceComputer()
-                        .deleteComputer(iD)) {
+                if (serviceComputer.deleteComputer(iD)) {
                     System.out.println("Computer successfully deleted");
                 } else {
                     System.out.println("No such computer");
@@ -146,8 +154,7 @@ public class ServiceCaller extends AbstractServiceUser {
                             .withName(companyName).build())
                     .build();
             try {
-                getServiceFactory().getServiceComputer()
-                        .createComputer(computer);
+                serviceComputer.createComputer(computer);
                 tryAgain = false;
                 System.out.println("Computer successfully created");
             } catch (ProblemListException e) {
@@ -182,8 +189,7 @@ public class ServiceCaller extends AbstractServiceUser {
                             .withName(companyName).build())
                     .build();
             try {
-                if (getServiceFactory().getServiceComputer()
-                        .updateComputer(computer)) {
+                if (serviceComputer.updateComputer(computer)) {
                     System.out.println("Computer successfully updated");
                 } else {
                     System.out.println("No such computer");
@@ -207,7 +213,7 @@ public class ServiceCaller extends AbstractServiceUser {
             String iD = reader.getString("Company ID (mandatory) : ");
 
             try {
-                if (getServiceFactory().getServiceCompany().deleteCompany(iD)) {
+                if (serviceCompany.deleteCompany(iD)) {
                     System.out.println("Company and all associated"
                             + " computers successfully deleted");
 

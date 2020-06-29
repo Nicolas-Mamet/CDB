@@ -15,7 +15,5 @@ public interface CompanyDAO {
 
     Optional<String> getCompanyName(long iD) throws SQLException;
 
-    void setDataSource(SQLDataSource dataSource);
-
     boolean deleteCompany(long id) throws SQLException;
 }

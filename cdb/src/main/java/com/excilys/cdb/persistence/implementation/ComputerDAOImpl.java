@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import com.excilys.cdb.exceptions.AbsurdException;
 import com.excilys.cdb.exceptions.CorruptComputerException;
@@ -30,22 +32,19 @@ import com.excilys.cdb.model.Computer;
 import com.excilys.cdb.model.Computer.ComputerBuilder;
 import com.excilys.cdb.model.Page;
 import com.excilys.cdb.persistence.interfaces.ComputerDAO;
-import com.excilys.cdb.persistence.interfaces.SQLDataSource;
+import com.excilys.cdb.persistence.interfaces.DataSource;
 import com.excilys.cdb.servlet.Order;
 
+@Repository
 public final class ComputerDAOImpl implements ComputerDAO {
 
     @SuppressWarnings("unused")
     private Logger logger = LoggerFactory.getLogger(CompanyDAOImpl.class);
 
-    private SQLDataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
-    @Override
-    public void setDataSource(SQLDataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public ComputerDAOImpl() {
+    private ComputerDAOImpl() {
     }
 
     private static final String COMPUTER_LIST_QUERY =
