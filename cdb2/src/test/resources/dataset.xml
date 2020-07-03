@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <company id="1" name="Apple Inc."/>
+  <company id="2" name="Thinking Machines"/>
+  <company id="3" name="RCA"/>
+  <company id="4" name="Netronics"/>
+  <company id="5" name="Tandy Corporation"/>
+  <company id="6" name="Commodore International"/>
+  <company id="7" name="MOS Technology"/>
+  <company id="8" name="Micro Instrumentation and Telemetry Systems"/>
+  <company id="9" name="IMS Associates, Inc."/>
+  <company id="10" name="Digital Equipment Corporation"/>
+  <company id="11" name="Lincoln Laboratory"/>
+  <company id="12" name="Moore School of Electrical Engineering"/>
+  <company id="13" name="IBM"/>
+  <company id="14" name="Amiga Corporation"/>
+  <company id="15" name="Canon"/>
+  <company id="16" name="Nokia"/>
+  <company id="17" name="Sony"/>
+  <company id="18" name="OQO"/>
+  <company id="19" name="NeXT"/>
+  <company id="20" name="Atari"/>
+</dataset>
