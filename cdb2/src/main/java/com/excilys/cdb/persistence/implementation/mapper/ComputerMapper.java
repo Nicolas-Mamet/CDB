@@ -19,8 +19,10 @@ public class ComputerMapper {
 
     public ComputerBuilder map(EComputer computer) {
         ComputerBuilder bob = Computer.builder().withName(computer.getName())
-                .withID(computer.getId())
-                .withCompany(companyMapper.map(computer.getCompany()));
+                .withID(computer.getId());
+        if (computer.getCompany() != null) {
+            bob.withCompany(companyMapper.map(computer.getCompany()));
+        }
         Mapper.toLocalDateTime(computer.getDiscontinued())
                 .ifPresent(bob::withDiscontinued);
         Mapper.toLocalDateTime(computer.getIntroduced())

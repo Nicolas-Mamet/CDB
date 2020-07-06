@@ -10,7 +10,6 @@ import com.excilys.cdb.dto.ComputerDTO;
 
 @Controller
 public class AddComputerServlet {
-    private static final long serialVersionUID = 1L;
 
 //    @RequestParam(required = false) String introduced,
 //    @RequestParam(required = false) String discontinued,

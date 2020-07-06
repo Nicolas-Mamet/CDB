@@ -22,11 +22,6 @@ public class AddressFilter implements Filter {
 //    }
 
     /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
-
-    /**
      * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
      */
     @Override

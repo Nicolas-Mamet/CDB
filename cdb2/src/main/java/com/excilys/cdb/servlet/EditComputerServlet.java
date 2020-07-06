@@ -12,7 +12,6 @@ import com.excilys.cdb.dto.ComputerDTO;
 
 @Controller
 public class EditComputerServlet {
-    private static final long serialVersionUID = 1L;
 
     @RequestMapping("/editcomputer2")
     protected ModelAndView treatRequest(ComputerDTO computer)

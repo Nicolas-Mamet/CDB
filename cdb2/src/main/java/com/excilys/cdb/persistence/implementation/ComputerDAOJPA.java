@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ import com.excilys.cdb.persistence.model.EComputer;
 import com.excilys.cdb.persistence.model.QECompany;
 import com.excilys.cdb.persistence.model.QEComputer;
 import com.excilys.cdb.servlet.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
 
@@ -68,7 +71,7 @@ public class ComputerDAOJPA implements ComputerDAO {
     public List<Computer> searchComputers(Page page, String search)
             throws DBException {
         try {
-            return buildComputers(listComputersQuery(search, page).fetch()
+            return buildComputers(listComputersQuery(page, search).fetch()
                     .stream().map(computerMapper::map)
                     .collect(Collectors.toList()));
         } catch (Exception e) {
@@ -79,8 +82,19 @@ public class ComputerDAOJPA implements ComputerDAO {
     @Override
     public List<Computer> getPageOfComputers(Page page) throws DBException {
         try {
-            return buildComputers(listComputersQuery(page).fetch().stream()
-                    .map(computerMapper::map).collect(Collectors.toList()));
+            JPAQuery<EComputer> query = listComputersQuery(page);
+            logger.trace("getPageOfComputers in ComputerDAOJPA");
+            logger.trace("query : " + query);
+            List<EComputer> computers = query.fetch();
+            logger.trace("computers : " + computers);
+            List<ComputerBuilder> builders = computers.stream()
+                    .map(computerMapper::map).collect(Collectors.toList());
+            logger.trace("builders: " + builders);
+            List<Computer> computers2 = buildComputers(builders);
+            logger.trace("computers : " + computers2);
+            return computers2;
+//            return buildComputers(listComputersQuery(page).fetch().stream()
+//                    .map(computerMapper::map).collect(Collectors.toList()));
         } catch (Exception e) {
             throw new DBException(e);
         }
@@ -104,6 +118,7 @@ public class ComputerDAOJPA implements ComputerDAO {
     }
 
     @Override
+    @Transactional
     public void createComputer(Computer computer) throws DBException {
         Optional<ECompany> company = getCompany(computer);
         try {
@@ -127,30 +142,57 @@ public class ComputerDAOJPA implements ComputerDAO {
     }
 
     @Override
+    @Transactional
     public boolean deleteComputer(long iD) throws DBException {
-        return 1 == deleteComputerClause(iD).execute();
+        try {
+            return 1 == deleteComputerClause(iD).execute();
+        } catch (Exception e) {
+            throw new DBException(e);
+        }
     }
 
     @Override
+    @Transactional
     public void deleteComputers(List<Long> ids) throws DBException {
-        deleteComputersClause(ids).execute();
+        try {
+            deleteComputersClause(ids).execute();
+        } catch (Exception e) {
+            throw new DBException(e);
+        }
     }
 
     @Override
+    @Transactional
     public void deleteComputersFromCompany(long id) throws DBException {
-        deleteComputersCompanyClause(id).execute();
+        try {
+            deleteComputersCompanyClause(id).execute();
+        } catch (Exception e) {
+            throw new DBException(e);
+        }
     }
 
     @Override
     public Collection<Computer> searchComputers(Page page, String search,
             Order order) throws DBException {
-
+        try {
+            return buildComputers(listComputersQuery(page, search, order)
+                    .fetch().stream().map(computerMapper::map)
+                    .collect(Collectors.toList()));
+        } catch (Exception e) {
+            throw new DBException(e);
+        }
     }
 
     @Override
     public Collection<Computer> searchComputers(Page page, Order order)
             throws DBException {
-
+        try {
+            return buildComputers(listComputersQuery(page, order).fetch()
+                    .stream().map(computerMapper::map)
+                    .collect(Collectors.toList()));
+        } catch (Exception e) {
+            throw new DBException(e);
+        }
     }
 
     private JPAQuery<EComputer> countComputersQuery() {
@@ -166,16 +208,25 @@ public class ComputerDAOJPA implements ComputerDAO {
     private JPAQuery<EComputer> listComputersQuery() {
         QEComputer computer = QEComputer.eComputer;
         QECompany company = QECompany.eCompany;
-        return new JPAQuery<EComputer>().from(computer)
+        return new JPAQuery<EComputer>(entityManager).from(computer)
                 .leftJoin(computer.company, company);
     }
 
-    private JPAQuery<EComputer> listComputersQuery(String search, Page page) {
+    private JPAQuery<EComputer> listComputersQuery(Page page, String search) {
         return decorate(listComputersQuery(page), search);
     }
 
     private JPAQuery<EComputer> listComputersQuery(Page page) {
         return decorate(listComputersQuery(), page);
+    }
+
+    private JPAQuery<EComputer> listComputersQuery(Page page, String search,
+            Order order) {
+        return decorate(listComputersQuery(page, search), order);
+    }
+
+    private JPAQuery<EComputer> listComputersQuery(Page page, Order order) {
+        return decorate(listComputersQuery(page), order);
     }
 
     private JPAQuery<EComputer> getComputerQuery(long id) {
@@ -215,6 +266,38 @@ public class ComputerDAOJPA implements ComputerDAO {
             String search) {
         QEComputer computer = QEComputer.eComputer;
         return query.where(computer.name.contains(search));
+    }
+
+    private JPAQuery<EComputer> decorate(JPAQuery<EComputer> query,
+            Order order) {
+        return query.orderBy(getOrder(order));
+    }
+
+    private OrderSpecifier<?> getOrder(Order order) {
+        QEComputer computer = QEComputer.eComputer;
+        ComparableExpressionBase<?> orderBy;
+        switch (order.getOrderBy()) {
+        case COMPANY:
+            orderBy = computer.company.name;
+            break;
+        case COMPUTER:
+            orderBy = computer.name;
+            break;
+        case DISCONTINUED:
+            orderBy = computer.discontinued;
+            break;
+        case INTRODUCED:
+            orderBy = computer.introduced;
+            break;
+        default:
+            throw new RuntimeException(
+                    "You forgot to complete the switch in ComputerDAOJPA");
+        }
+        if (order.isAsc()) {
+            return orderBy.asc();
+        } else {
+            return orderBy.desc();
+        }
     }
 
     private List<Computer> buildComputers(List<ComputerBuilder> builders) {

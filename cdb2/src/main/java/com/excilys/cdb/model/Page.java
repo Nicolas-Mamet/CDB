@@ -46,6 +46,11 @@ public class Page {
         return offset == p.offset && limit == p.limit;
     }
 
+    @Override
+    public String toString() {
+        return "Page [offset=" + offset + ", limit=" + limit + "]";
+    }
+
     /**
      * Creates builder to build {@link Page}.
      *

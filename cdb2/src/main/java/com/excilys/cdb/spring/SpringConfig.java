@@ -21,6 +21,7 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -52,6 +53,7 @@ import com.zaxxer.hikari.HikariDataSource;
         CompanyValidator.class, PageValidator.class })
 @ImportResource("classpath:/applicationcontext.xml")
 @EnableWebMvc
+@EnableTransactionManagement
 public class SpringConfig implements WebMvcConfigurer {
 
     public static void init() {
@@ -141,11 +143,7 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public PlatformTransactionManager transactionManager(
             LocalContainerEntityManagerFactoryBean entityManagerFactoryBean) {
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager
-                .setEntityManagerFactory(entityManagerFactoryBean.getObject());
-
-        return transactionManager;
+        return new JpaTransactionManager(entityManagerFactoryBean.getObject());
     }
 
     @Bean

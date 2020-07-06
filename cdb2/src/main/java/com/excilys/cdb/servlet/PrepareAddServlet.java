@@ -14,7 +14,6 @@ import com.excilys.cdb.exceptions.DBException;
  */
 @Controller
 public class PrepareAddServlet {
-    private static final long serialVersionUID = 1L;
 
     @RequestMapping("/addcomputer")
     public ModelAndView treatRequest() {

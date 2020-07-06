@@ -67,7 +67,7 @@ public class CompanyDAOJPA implements CompanyDAO {
     private JPAQuery<ECompany> companyListQuery() {
         QECompany company = QECompany.eCompany;
         return new JPAQuery<ECompany>(entityManager).from(company)
-                .orderBy(company.id.asc());
+                .orderBy(company.name.asc());
     }
 
     private JPAQuery<ECompany> pageListQuery(Page page) {

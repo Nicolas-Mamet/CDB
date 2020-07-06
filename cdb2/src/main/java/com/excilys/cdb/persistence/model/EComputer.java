@@ -9,7 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.excilys.cdb.exceptions.AbsurdOptionalException;
 import com.excilys.cdb.mapper.Mapper;
 import com.excilys.cdb.model.Computer;
 
@@ -59,10 +58,9 @@ public class EComputer {
             this.id = computer.getId();
         }
         this.name = computer.getName();
-        this.introduced = Mapper.valueOf(computer.getIntroduced())
-                .orElseThrow(AbsurdOptionalException::new);
-        this.discontinued = Mapper.valueOf(computer.getDiscontinued())
-                .orElseThrow(AbsurdOptionalException::new);
+        this.introduced = Mapper.valueOf(computer.getIntroduced()).orElse(null);
+        this.discontinued =
+                Mapper.valueOf(computer.getDiscontinued()).orElse(null);
         this.company = null;
     }
 

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.excilys.cdb.dto.ComputerDTO;
 import com.excilys.cdb.dto.PageDTO;
@@ -40,8 +41,13 @@ public class ServiceComputerImpl implements ServiceComputer {
             throws ProblemListException, DBException {
         Page page = MapperDTO.dtoToPage(pageDTO).orElse(null);
         logger.debug("getComputers without search nor order");
-        return computerDAO.getPageOfComputers(page).stream()
-                .filter(c -> c != null)
+        logger.trace(
+                "ServiceCompany before call to DAO (getcomputerpage with no other parameter)");
+        logger.trace("dao : " + computerDAO);
+        logger.trace("page : " + page);
+        List<Computer> computers = computerDAO.getPageOfComputers(page);
+        logger.trace("computers " + computers);
+        return computers.stream().filter(c -> c != null)
                 .map(c -> MapperDTO.computerToDTO(c).get())
                 .collect(Collectors.toList());
     }
@@ -104,6 +110,7 @@ public class ServiceComputerImpl implements ServiceComputer {
     }
 
     @Override
+    @Transactional
     public boolean updateComputer(ComputerDTO computerDTO)
             throws ProblemListException, NullComputerException, DBException {
         Computer computer = MapperDTO.dtoToComputer(computerDTO)

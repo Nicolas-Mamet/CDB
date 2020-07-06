@@ -4,6 +4,10 @@ import java.util.List;
 
 public class ProblemListException extends Exception {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     List<Problem> list;
 
     public ProblemListException(List<Problem> list) {

@@ -13,7 +13,6 @@ import com.excilys.cdb.exceptions.NotLongException;
 import com.excilys.cdb.exceptions.NullComputerException;
 import com.excilys.cdb.exceptions.Problem;
 import com.excilys.cdb.exceptions.ProblemListException;
-import com.excilys.cdb.mapper.Mapper;
 import com.excilys.cdb.services.interfaces.ServiceCompany;
 import com.excilys.cdb.services.interfaces.ServiceComputer;
 
@@ -58,18 +57,18 @@ public class ServiceCaller {
 //        }
     }
 
-    private static long readLimit() throws IOException {
-        long limit = 0;
-        while (limit < 1) {
-            String line = reader.getString("Page limit :");
-            try {
-                limit = Mapper.mapLong(line);
-            } catch (NotLongException e) {
-                System.out.println("not a long");
-            }
-        }
-        return limit;
-    }
+//    private static long readLimit() throws IOException {
+//        long limit = 0;
+//        while (limit < 1) {
+//            String line = reader.getString("Page limit :");
+//            try {
+//                limit = Mapper.mapLong(line);
+//            } catch (NotLongException e) {
+//                System.out.println("not a long");
+//            }
+//        }
+//        return limit;
+//    }
 
     public static void printCompanyList() throws DBException, IOException {
         System.out.println("not implemented");
@@ -173,7 +172,7 @@ public class ServiceCaller {
     public static void updateComputer() throws IOException, DBException {
         boolean tryAgain = true;
         while (tryAgain) {
-            String iD = reader.getString("Computer ID (mandatory) : ");
+//            String iD = reader.getString("Computer ID (mandatory) : ");
             String name = reader.getString("Computer name (mandatory) :");
             String introduced = reader.getString(
                     "Introduced the : (leave an empty line if no information");
