@@ -34,23 +34,24 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
+import com.excilys.cdb.model.service.ServiceCompanyImpl;
+import com.excilys.cdb.model.service.ServiceComputerImpl;
 import com.excilys.cdb.model.validator.CompanyValidator;
 import com.excilys.cdb.model.validator.ComputerValidator;
 import com.excilys.cdb.model.validator.PageValidator;
-import com.excilys.cdb.persistence.implementation.CompanyDAOImpl;
-import com.excilys.cdb.persistence.implementation.ComputerDAOImpl;
-import com.excilys.cdb.services.implementation.ServiceCompanyImpl;
-import com.excilys.cdb.services.implementation.ServiceComputerImpl;
-import com.excilys.cdb.servlet.ComputerDTOResolver;
+import com.excilys.cdb.mvc.controller.ComputerDTOResolver;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
-@ComponentScan(basePackages = "com.excilys.cdb")
-@ComponentScan(basePackageClasses = { CompanyDAOImpl.class,
-        ComputerDAOImpl.class, ServiceCompanyImpl.class,
-        ServiceComputerImpl.class, ComputerValidator.class,
-        CompanyValidator.class, PageValidator.class })
+@ComponentScan(
+    basePackages = { "com.excilys.cdb.model", "com.excilys.cdb.persistence",
+            "com.excilys.cdb.mvc", "com.excilys.cdb.adapter",
+            "com.excilys.cdb.crossProject" })
+@ComponentScan(
+    basePackageClasses = { ServiceCompanyImpl.class,
+            ServiceComputerImpl.class, ComputerValidator.class,
+            CompanyValidator.class, PageValidator.class })
 @ImportResource("classpath:/applicationcontext.xml")
 @EnableWebMvc
 @EnableTransactionManagement

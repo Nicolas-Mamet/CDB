@@ -1,34 +1,30 @@
 package com.excilys.cdb.persistence.interfaces;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import com.excilys.cdb.exceptions.CorruptComputersException;
-import com.excilys.cdb.exceptions.DBException;
-import com.excilys.cdb.model.Computer;
-import com.excilys.cdb.model.Page;
-import com.excilys.cdb.servlet.Order;
+import com.excilys.cdb.crossProject.Order;
+import com.excilys.cdb.crossProject.exceptions.DBException;
+import com.excilys.cdb.persistence.Page;
+import com.excilys.cdb.persistence.entity.EComputer;
 
 public interface ComputerDAO {
+    long countComputers();
 
-    long countComputers() throws DBException, CorruptComputersException;
+    long countComputers(String search);
 
-    long countComputers(String search) throws DBException;
+    List<EComputer> searchComputers(Page page, String search);
 
-    List<Computer> searchComputers(Page page, String search) throws DBException;
+    List<EComputer> getPageOfComputers(Page page);
 
-    List<Computer> getPageOfComputers(Page page) throws DBException;
-
-    Optional<Computer> getComputer(long iD) throws DBException;
+    Optional<EComputer> getComputer(long iD);
 
     /**
      * Add a computer in the database based on the parameter.
      *
      * @param c The computer created will be identical to c except for the id
-     * @throws DBException if something goes wrong with the database
      */
-    void createComputer(Computer computer) throws DBException;
+    void createComputer(EComputer computer);
 
     /**
      * Updates the computer with the specified ID to make it identical to the
@@ -36,38 +32,33 @@ public interface ComputerDAO {
      *
      * @param c the computer having the same id as c will be updated to
      *          correspond to the content of c
-     * @throws DBException if something goes wrong with the database
      */
-    boolean updateComputer(Computer computer) throws DBException;
+    boolean updateComputer(EComputer computer);
 
     /**
      * Delete the computer with the specified ID.
      *
      * @param id
-     * @throws DBException if something goes wrong with the database
      */
-    boolean deleteComputer(long iD) throws DBException;
+    boolean deleteComputer(long iD);
 
     /**
      * Delete all computer whose ids are passed in the parameter
      *
      * @param ids list of computer ids to delete
      * @return list of unknown ids
-     * @throws DBException
      */
-    void deleteComputers(List<Long> ids) throws DBException;
+    void deleteComputers(List<Long> ids);
 
     /**
      * delete all computers from given company
      *
      * @param id company id
-     * @throws DBException
      */
-    void deleteComputersFromCompany(long id) throws DBException;
+    void deleteComputersFromCompany(long id);
 
-    Collection<Computer> searchComputers(Page page, String search, Order order)
+    List<EComputer> searchComputers(Page page, String search, Order order)
             throws DBException;
 
-    Collection<Computer> searchComputers(Page page, Order order)
-            throws DBException;
+    List<EComputer> searchComputers(Page page, Order order);
 }

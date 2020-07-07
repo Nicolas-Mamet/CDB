@@ -1,7 +1,7 @@
 package com.excilys.cdb.persistence.implementation;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -10,14 +10,11 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.excilys.cdb.exceptions.DBException;
-import com.excilys.cdb.model.Company;
-import com.excilys.cdb.model.Page;
-import com.excilys.cdb.persistence.implementation.mapper.CompanyMapper;
+import com.excilys.cdb.persistence.Page;
+import com.excilys.cdb.persistence.entity.ECompany;
+import com.excilys.cdb.persistence.entity.QECompany;
 import com.excilys.cdb.persistence.interfaces.CompanyDAO;
 import com.excilys.cdb.persistence.interfaces.ComputerDAO;
-import com.excilys.cdb.persistence.model.ECompany;
-import com.excilys.cdb.persistence.model.QECompany;
 import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
 
@@ -28,40 +25,29 @@ public class CompanyDAOJPA implements CompanyDAO {
     private EntityManager entityManager;
 
     @Autowired
-    private CompanyMapper companyMapper;
-
-    @Autowired
     private ComputerDAO computerDAO;
 
     @Override
-    public List<Company> getCompanies() throws DBException {
-        try {
-            return companyListQuery().fetch().stream().map(companyMapper::map)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new DBException(e);
-        }
+    public List<ECompany> getCompanies() {
+        return companyListQuery().fetch();
     }
 
     @Override
-    public List<Company> getPageOfCompanies(Page page) throws DBException {
-        try {
-            return pageListQuery(page).fetch().stream().map(companyMapper::map)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new DBException(e);
-        }
+    public List<ECompany> getPageOfCompanies(Page page) {
+        return pageListQuery(page).fetch();
     }
 
     @Override
     @Transactional
-    public boolean deleteCompany(long id) throws DBException {
+    public boolean deleteCompany(long id) {
         computerDAO.deleteComputersFromCompany(id);
-        try {
-            return 1 == deleteCompanyQuery(id).execute();
-        } catch (Exception e) {
-            throw new DBException(e);
-        }
+        return 1 == deleteCompanyQuery(id).execute();
+    }
+
+    @Override
+    public Optional<ECompany> getCompany(long id) {
+        return Optional.ofNullable(entityManager.find(ECompany.class,
+                id));
     }
 
     private JPAQuery<ECompany> companyListQuery() {

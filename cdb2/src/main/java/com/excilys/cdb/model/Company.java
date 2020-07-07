@@ -2,7 +2,7 @@ package com.excilys.cdb.model;
 
 import org.springframework.stereotype.Component;
 
-import com.excilys.cdb.exceptions.ProblemListException;
+import com.excilys.cdb.crossProject.exceptions.ProblemListException;
 import com.excilys.cdb.model.validator.Validator;
 
 public final class Company {

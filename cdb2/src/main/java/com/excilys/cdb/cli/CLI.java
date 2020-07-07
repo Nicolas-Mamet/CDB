@@ -2,7 +2,7 @@ package com.excilys.cdb.cli;
 
 import java.io.IOException;
 
-import com.excilys.cdb.exceptions.DBException;
+import com.excilys.cdb.crossProject.exceptions.DBException;
 
 public final class CLI extends AbstractCanRead {
 

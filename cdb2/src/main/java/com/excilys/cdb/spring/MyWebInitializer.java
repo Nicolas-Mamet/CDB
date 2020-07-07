@@ -6,40 +6,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-import com.excilys.cdb.logger.LoggerSetup;
-import com.excilys.cdb.servlet.AddressFilter;
+import com.excilys.cdb.adapter.DAOAdapter.SpringConfigDAOAdapter;
+import com.excilys.cdb.adapter.ServiceAdapter.SpringConfigService;
+import com.excilys.cdb.model.SpringConfigModel;
+import com.excilys.cdb.model.validator.SpringConfigValidator;
+import com.excilys.cdb.mvc.SpringConfigMVC;
+import com.excilys.cdb.mvc.controller.AddressFilter;
+import com.excilys.cdb.persistence.implementation.SpringConfigDAO;
 
 public class MyWebInitializer
         extends AbstractAnnotationConfigDispatcherServletInitializer {
-//    @Override
-//    public void onStartup(ServletContext servletContext)
-//            throws ServletException {
-//        AnnotationConfigWebApplicationContext webContext =
-//                new AnnotationConfigWebApplicationContext();
-//        webContext.register(SpringConfig.class);
-//        webContext.setServletContext(servletContext);
-//        webContext.refresh();
-//        ServletRegistration.Dynamic registration = servletContext
-//                .addServlet("dispatcher", new DispatcherServlet(webContext));
-//        registration.setLoadOnStartup(1);
-//        registration.addMapping("/");
-//    }
+
     @SuppressWarnings("unused")
     private static final Logger LOGGER;
 
     static {
         LoggerSetup.setDefaultLevelToTrace();
         LOGGER = LoggerFactory.getLogger(MyWebInitializer.class);
+//        LOGGER.trace("MyWebInitializer static initialization");
     }
 
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return null;
+        return new Class[] { SpringConfigValidator.class,
+                SpringConfigModel.class,
+                SpringConfigDAO.class,
+                SpringConfigDAOAdapter.class, SpringConfigService.class };
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class<?>[] { SpringConfig.class };
+        return new Class<?>[] { SpringConfigMVC.class };
     }
 
     @Override

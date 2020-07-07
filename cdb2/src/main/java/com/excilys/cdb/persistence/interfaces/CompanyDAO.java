@@ -1,18 +1,17 @@
 package com.excilys.cdb.persistence.interfaces;
 
 import java.util.List;
+import java.util.Optional;
 
-import com.excilys.cdb.exceptions.DBException;
-import com.excilys.cdb.model.Company;
-import com.excilys.cdb.model.Page;
+import com.excilys.cdb.persistence.Page;
+import com.excilys.cdb.persistence.entity.ECompany;
 
 public interface CompanyDAO {
+    List<ECompany> getCompanies();
 
-    List<Company> getCompanies() throws DBException;
+    List<ECompany> getPageOfCompanies(Page page);
 
-    List<Company> getPageOfCompanies(Page page) throws DBException;
+    Optional<ECompany> getCompany(long id);
 
-//    Optional<Company> getCompany(long iD) throws DBException;
-
-    boolean deleteCompany(long id) throws DBException;
+    boolean deleteCompany(long id);
 }

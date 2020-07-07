@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.excilys.cdb.exceptions.Problem;
-import com.excilys.cdb.exceptions.ProblemListException;
+import com.excilys.cdb.crossProject.exceptions.Problem;
+import com.excilys.cdb.crossProject.exceptions.ProblemListException;
 import com.excilys.cdb.model.Page.PageBuilder;
 
 @Component

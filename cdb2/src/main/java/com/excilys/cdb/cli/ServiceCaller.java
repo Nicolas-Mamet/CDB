@@ -5,24 +5,24 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.excilys.cdb.dto.CompanyDTO;
-import com.excilys.cdb.dto.ComputerDTO;
-import com.excilys.cdb.exceptions.DBException;
-import com.excilys.cdb.exceptions.InvalidCompanyException;
-import com.excilys.cdb.exceptions.NotLongException;
-import com.excilys.cdb.exceptions.NullComputerException;
-import com.excilys.cdb.exceptions.Problem;
-import com.excilys.cdb.exceptions.ProblemListException;
-import com.excilys.cdb.services.interfaces.ServiceCompany;
-import com.excilys.cdb.services.interfaces.ServiceComputer;
+import com.excilys.cdb.crossProject.exceptions.DBException;
+import com.excilys.cdb.crossProject.exceptions.InvalidCompanyException;
+import com.excilys.cdb.crossProject.exceptions.NotLongException;
+import com.excilys.cdb.crossProject.exceptions.NullComputerException;
+import com.excilys.cdb.crossProject.exceptions.Problem;
+import com.excilys.cdb.crossProject.exceptions.ProblemListException;
+import com.excilys.cdb.mvc.dto.CompanyDTO;
+import com.excilys.cdb.mvc.dto.ComputerDTO;
+import com.excilys.cdb.mvc.service.CompanyService;
+import com.excilys.cdb.mvc.service.ComputerService;
 
 public class ServiceCaller {
 
     @Autowired
-    private static ServiceCompany serviceCompany;
+    private static CompanyService serviceCompany;
 
     @Autowired
-    private static ServiceComputer serviceComputer;
+    private static ComputerService serviceComputer;
 
     private static ReadFromCL reader;
 
