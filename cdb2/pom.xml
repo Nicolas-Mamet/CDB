@@ -6,8 +6,8 @@
 
   <groupId>com.excilys</groupId>
   <artifactId>cdb</artifactId>
-  <version>0.0.4</version>
-  <packaging>war</packaging>
+  <version>0.0.5</version>
+  <packaging>pom</packaging>
 
   <name>cdb Maven Webapp</name>
   <!-- FIXME change it to the project's website -->
@@ -15,8 +15,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <spring.version>5.2.7.RELEASE</spring.version>
     <querydsl.version>4.3.1</querydsl.version>
   </properties>
@@ -217,5 +217,15 @@
         </plugin>
     </plugins>
   </reporting>
+  <modules>
+  	<module>core</module>
+  	<module>persistence</module>
+  	<module>model</module>
+  	<module>mvc</module>
+  	<module>serviceadapter</module>
+  	<module>daoadapter</module>
+  	<module>webapp</module>
+  	<module>console</module>
+  </modules>
 </project>
 
