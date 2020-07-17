@@ -14,6 +14,7 @@ import com.excilys.cdb.model.config.SpringConfigValidator;
 import com.excilys.cdb.mvc.SpringConfigMVC;
 import com.excilys.cdb.mvc.controller.AddressFilter;
 import com.excilys.cdb.persistence.implementation.SpringConfigDAO;
+import com.excilys.cdb.security.config.SpringConfigSecurity;
 
 public class MyWebInitializer
         extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -32,7 +33,8 @@ public class MyWebInitializer
         return new Class[] { SpringConfigValidator.class,
                 SpringConfigModel.class,
                 SpringConfigDAO.class,
-                SpringConfigDAOAdapter.class, SpringConfigService.class };
+                SpringConfigDAOAdapter.class, SpringConfigService.class,
+                SpringConfigSecurity.class };
     }
 
     @Override

@@ -11,9 +11,10 @@ import com.excilys.cdb.mvc.dto.ComputerDTO;
 
 public class ComputerDTOResolver implements HandlerMethodArgumentResolver {
 
-    private Object buildComputerDTO(NativeWebRequest request) {
+    private ComputerDTO buildComputerDTO(NativeWebRequest request) {
         String id =
-                ControllerCommonFunction.getParameter(request, "id").orElse(null);
+                ControllerCommonFunction.getParameter(request, "id")
+                        .orElse(null);
         String introduced = ControllerCommonFunction
                 .getParameter(request, "introduced").orElse(null);
         String discontinued = ControllerCommonFunction
@@ -33,8 +34,10 @@ public class ComputerDTOResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter,
-            ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
+    public ComputerDTO resolveArgument(
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
             WebDataBinderFactory binderFactory) throws Exception {
         return buildComputerDTO(webRequest);
     }

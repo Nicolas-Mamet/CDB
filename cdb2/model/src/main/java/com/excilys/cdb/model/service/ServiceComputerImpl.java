@@ -86,4 +86,7 @@ public class ServiceComputerImpl implements ComputerService {
     public void deleteComputers(List<Long> ids) throws DBException {
         computerDAO.deleteComputers(ids);
     }
+
+    private ServiceComputerImpl() {
+    }
 }

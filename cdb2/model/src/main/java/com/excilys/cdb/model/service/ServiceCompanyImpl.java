@@ -16,7 +16,10 @@ public final class ServiceCompanyImpl implements CompanyService {
     @Autowired
     CompanyDAO companyDAO;
 
-    private ServiceCompanyImpl() {
+    /**
+     * default access for testing purpose only
+     */
+    ServiceCompanyImpl() {
     }
 
     @Override

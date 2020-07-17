@@ -18,4 +18,10 @@ public class CompanyMapper {
                     + " the database schema should" + " prevent this");
         }
     }
+
+    /**
+     * default access
+     */
+    CompanyMapper() {
+    }
 }

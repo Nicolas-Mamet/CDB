@@ -6,4 +6,12 @@
     <version>0.0.5</version>
   </parent>
   <artifactId>core</artifactId>
+  <dependencies>
+  
+    <!-- LOGGING -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+    </dependency>
+  </dependencies>
 </project>
